@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Auth.API", "PathMentor.Auth.API\PathMentor.Auth.API.csproj", "{177F98A7-0154-4C97-ABCA-1D0ED88A7DA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Core", "PathMentor.Core\PathMentor.Core.csproj", "{CAB8FD32-6613-437C-8FAF-3B87347FCF10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Data", "PathMentor.Data\PathMentor.Data.csproj", "{53829CAE-691F-4196-B0C4-A9A63E615FEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Infrastructure", "PathMentor.Infrastructure\PathMentor.Infrastructure.csproj", "{9218EA66-ACFD-4EF8-A774-35109DDC74D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Test.API", "PathMentor.Test.API\PathMentor.Test.API.csproj", "{E6FEDDB1-B669-4E54-B38E-2C2A8A74FA5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "docker-compose", "docker-compose.dcproj", "{1d6a46ce-72ed-459b-bce7-0efbf22385e2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{177F98A7-0154-4C97-ABCA-1D0ED88A7DA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{177F98A7-0154-4C97-ABCA-1D0ED88A7DA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{177F98A7-0154-4C97-ABCA-1D0ED88A7DA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{177F98A7-0154-4C97-ABCA-1D0ED88A7DA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAB8FD32-6613-437C-8FAF-3B87347FCF10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAB8FD32-6613-437C-8FAF-3B87347FCF10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAB8FD32-6613-437C-8FAF-3B87347FCF10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAB8FD32-6613-437C-8FAF-3B87347FCF10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53829CAE-691F-4196-B0C4-A9A63E615FEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53829CAE-691F-4196-B0C4-A9A63E615FEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53829CAE-691F-4196-B0C4-A9A63E615FEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53829CAE-691F-4196-B0C4-A9A63E615FEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9218EA66-ACFD-4EF8-A774-35109DDC74D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9218EA66-ACFD-4EF8-A774-35109DDC74D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9218EA66-ACFD-4EF8-A774-35109DDC74D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9218EA66-ACFD-4EF8-A774-35109DDC74D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6FEDDB1-B669-4E54-B38E-2C2A8A74FA5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6FEDDB1-B669-4E54-B38E-2C2A8A74FA5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6FEDDB1-B669-4E54-B38E-2C2A8A74FA5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6FEDDB1-B669-4E54-B38E-2C2A8A74FA5C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
