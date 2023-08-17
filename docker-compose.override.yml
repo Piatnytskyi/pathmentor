@@ -1,6 +1,14 @@
 version: '3.4'
 
 services:
+  pathmentor.web:
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "5004:80"
+    volumes:
+      - ./pathmentor.web:/client
+      - ./pathmentor.web/node_modules:/client/node_modules/
   pathmentor.test.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
