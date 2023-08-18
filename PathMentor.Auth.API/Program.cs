@@ -84,6 +84,17 @@ builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 
+var allowedCrossOriginPolicyName = "AllowedCrossOrigin";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        allowedCrossOriginPolicyName,
+        policy => policy.WithOrigins(
+                builder.Configuration.GetSection("AllowedCrossOrigins").Get<string[]>())
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -110,5 +121,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(allowedCrossOriginPolicyName);
 
 app.Run();

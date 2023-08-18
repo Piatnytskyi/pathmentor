@@ -70,6 +70,17 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+var allowedCrossOriginPolicyName = "AllowedCrossOrigin";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        allowedCrossOriginPolicyName,
+        policy => policy.WithOrigins(
+                builder.Configuration.GetSection("AllowedCrossOrigins").Get<string[]>())
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -94,5 +105,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(allowedCrossOriginPolicyName);
 
 app.Run();

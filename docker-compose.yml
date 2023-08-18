@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   pathmentor.web:
+    container_name: pathmentor.web
     image: ${DOCKER_REGISTRY-}pathmentor.web
     build:
       context: .
@@ -11,6 +12,7 @@ services:
       - pathmentor.auth.api
 
   pathmentor.test.api:
+    container_name: pathmentor.test.api
     image: ${DOCKER_REGISTRY-}pathmentor.test.api
     build:
       context: .
@@ -19,6 +21,7 @@ services:
       - pathmentormssqlserver
 
   pathmentor.auth.api:
+    container_name: pathmentor.auth.api
     image: ${DOCKER_REGISTRY-}pathmentor.auth.api
     build:
       context: .
