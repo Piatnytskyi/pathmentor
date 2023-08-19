@@ -1,0 +1,7 @@
+FROM node:alpine AS build
+WORKDIR /client
+COPY pathmentor.web/package.json .
+RUN npm i
+COPY pathmentor.web .
+EXPOSE 3000
+CMD [ "npm", "start" ]
