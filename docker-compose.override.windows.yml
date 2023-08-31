@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  pathmentor.web:
+    build:
+      dockerfile: pathmentor.web\Dockerfile.dev
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .\pathmentor.web:/client
+      - .\pathmentor.web\node_modules:/client/node_modules/
+  pathmentor.test.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTPS_PORT=5003
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=test
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/localhost.pfx
+    ports:
+      - "5002:80"
+      - "5003:443"
+    volumes:
+      - ${APPDATA}\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}\ASP.NET\Https:/root/.aspnet/https:ro
+  pathmentor.auth.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTPS_PORT=5001
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=test
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/localhost.pfx
+    ports:
+      - "5000:80"
+      - "5001:443"
+    volumes:
+      - ${APPDATA}\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}\ASP.NET\Https:/root/.aspnet/https:ro
