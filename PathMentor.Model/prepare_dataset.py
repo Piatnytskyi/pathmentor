@@ -81,9 +81,9 @@ remove_list = ['Click to write Choice 13', 'No / None', 'Other', 'etc', 'etc)', 
 
 def map_and_remove_skills(skill_set, skill_map, remove_list):
     skills = skill_set.split(', ')
-    mapped_skills = [skill_map.get(skill, skill) for skill in skills if skill not in remove_list]
+    mapped_skills = set([skill_map.get(skill, skill) for skill in skills if skill not in remove_list])
 
-    return ', '.join(mapped_skills)
+    return ', '.join(sorted(mapped_skills))
 
 df['skill_set'] = df['skill_set'].apply(lambda x: map_and_remove_skills(x, skill_map, remove_list))
 
@@ -99,42 +99,3 @@ df['salary'] = df['salary'].apply(categorize_salary)
 desplay_unique()
 
 df.to_csv('prepared_dataset.csv', sep='\t', index=True)
-
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
-
-def get_unique_counts(df, columns):
-    counts = {}
-    for column in columns:
-        counts[column] = df[column].value_counts()
-    return counts
-
-# Function to get unique skill counts
-def get_unique_skill_counts(df):
-    skill_count = {}
-    for row in df['skill_set']:
-        if pd.notna(row) and row:
-            skills = row.split(', ')
-            for skill in skills:
-                skill_count[skill] = skill_count.get(skill, 0) + 1
-    return skill_count
-
-# Get counts for both train and test sets
-train_counts = get_unique_counts(train_df, ['title', 'experience', 'salary'])
-train_skill_counts = get_unique_skill_counts(train_df)
-
-test_counts = get_unique_counts(test_df, ['title', 'experience', 'salary'])
-test_skill_counts = get_unique_skill_counts(test_df)
-
-# Function to print side-by-side counts
-def print_side_by_side_counts(train_counts, test_counts, label):
-    print(f"===== {label} Counts =====")
-    for key in set(train_counts.keys()).union(test_counts.keys()):
-        train_count = train_counts.get(key, 0)
-        test_count = test_counts.get(key, 0)
-        print(f"{key}, {train_count}, {test_count}")
-
-# Display counts
-for column in ['title', 'experience', 'salary']:
-    print_side_by_side_counts(train_counts[column], test_counts[column], column)
-
-print_side_by_side_counts(train_skill_counts, test_skill_counts, 'Skill')
