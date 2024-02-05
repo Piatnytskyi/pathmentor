@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 df = pd.read_csv('dataset.csv', sep='\t', low_memory=False)
 
@@ -86,6 +85,9 @@ def map_and_remove_skills(skill_set, skill_map, remove_list):
     return ', '.join(sorted(mapped_skills))
 
 df['skill_set'] = df['skill_set'].apply(lambda x: map_and_remove_skills(x, skill_map, remove_list))
+
+df.replace('', np.nan, inplace=True)
+df = df.dropna()
 
 display_unique_skills()
 
