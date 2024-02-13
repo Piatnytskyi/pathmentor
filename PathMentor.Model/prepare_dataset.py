@@ -44,6 +44,8 @@ skill_map = {
     'Fast.ai': 'fastai',
     'Fastai': 'fastai',
 
+    'Domino Data Lab': 'Domino Datalab',
+
     'Azure SQL Database':'Microsoft Azure SQL Database',
     
     'Azure Notebook':'Azure Notebooks',
