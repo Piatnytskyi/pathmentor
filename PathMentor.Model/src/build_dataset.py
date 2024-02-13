@@ -7,24 +7,24 @@ import pandas as pd
 kaggle_api = KaggleApi()
 kaggle_api.authenticate()
 
-kaggle_api.dataset_download_files('kaggle/kaggle-survey-2018', unzip=True)
-kaggle_api.competition_download_files('kaggle-survey-2020')
-with zipfile.ZipFile('kaggle-survey-2020.zip', 'r') as zip_ref:
-    zip_ref.extractall()
-kaggle_api.competition_download_files('kaggle-survey-2021')
-with zipfile.ZipFile('kaggle-survey-2021.zip', 'r') as zip_ref:
-    zip_ref.extractall()
-kaggle_api.competition_download_files('kaggle-survey-2022')
-with zipfile.ZipFile('kaggle-survey-2022.zip', 'r') as zip_ref:
-    zip_ref.extractall()
+kaggle_api.dataset_download_files('kaggle/kaggle-survey-2018', '../bin', unzip=True)
+kaggle_api.competition_download_files('kaggle-survey-2020', '../bin')
+with zipfile.ZipFile('../bin/kaggle-survey-2020.zip', 'r') as zip_ref:
+    zip_ref.extractall('../bin')
+kaggle_api.competition_download_files('kaggle-survey-2021', '../bin')
+with zipfile.ZipFile('../bin/kaggle-survey-2021.zip', 'r') as zip_ref:
+    zip_ref.extractall('../bin')
+kaggle_api.competition_download_files('kaggle-survey-2022', '../bin')
+with zipfile.ZipFile('../bin/kaggle-survey-2022.zip', 'r') as zip_ref:
+    zip_ref.extractall('../bin')
 
-df_2018 = pd.read_csv('multipleChoiceResponses.csv', low_memory=False, header=[0,1])
+df_2018 = pd.read_csv('../bin/multipleChoiceResponses.csv', low_memory=False, header=[0,1])
 questions_2018 = pd.DataFrame(list(zip(df_2018.columns.get_level_values(0), df_2018.columns.get_level_values(1))))
-df_2020 = pd.read_csv('kaggle_survey_2020_responses.csv', low_memory=False, header=[0,1])
+df_2020 = pd.read_csv('../bin/kaggle_survey_2020_responses.csv', low_memory=False, header=[0,1])
 questions_2020 = pd.DataFrame(list(zip(df_2020.columns.get_level_values(0), df_2020.columns.get_level_values(1))))
-df_2021 = pd.read_csv('kaggle_survey_2021_responses.csv', low_memory=False, header=[0,1])
+df_2021 = pd.read_csv('../bin/kaggle_survey_2021_responses.csv', low_memory=False, header=[0,1])
 questions_2021 = pd.DataFrame(list(zip(df_2021.columns.get_level_values(0), df_2021.columns.get_level_values(1))))
-df_2022 = pd.read_csv('kaggle_survey_2022_responses.csv', low_memory=False, header=[0,1])
+df_2022 = pd.read_csv('../bin/kaggle_survey_2022_responses.csv', low_memory=False, header=[0,1])
 questions_2022 = pd.DataFrame(list(zip(df_2022.columns.get_level_values(0), df_2022.columns.get_level_values(1))))
 
 df_2018.columns = df_2018.columns.droplevel(1)
@@ -343,4 +343,4 @@ df_2022 = df_2022.rename(columns={'Q23':'title','Q11':'experience'})
 
 merged_df = pd.concat([df_2018, df_2020, df_2021, df_2022], ignore_index=True)
 
-merged_df.to_csv('dataset.csv', sep='\t')
+merged_df.to_csv('../bin/dataset.csv', sep='\t')

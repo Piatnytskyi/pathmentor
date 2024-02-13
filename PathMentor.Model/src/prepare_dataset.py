@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv('dataset.csv', sep='\t', low_memory=False)
+df = pd.read_csv('../bin/dataset.csv', sep='\t', low_memory=False)
 
 print(df.columns.tolist())
 
@@ -102,4 +102,4 @@ df['salary'] = df['salary'].apply(categorize_salary)
 
 desplay_unique()
 
-df.to_csv('prepared_dataset.csv', sep='\t', index=True)
+df.to_csv('../bin/prepared_dataset.csv', sep='\t', index=True)
