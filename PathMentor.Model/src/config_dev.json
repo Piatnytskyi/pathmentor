@@ -1,0 +1,6 @@
+{
+    "database": "pathmentor",
+    "train_collection": "train",
+    "test_collection": "test"
+}
+  

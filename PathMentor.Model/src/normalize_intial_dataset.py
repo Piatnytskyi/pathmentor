@@ -1,7 +1,10 @@
+import json
+import os
 import pandas as pd
+from dotenv import dotenv_values
 from sklearn.model_selection import train_test_split
-from core.interaction_tf_record_builder import InteractionTFRecordBuilder
-from core.skill_tf_record_builder import SkillTFRecordBuilder
+from database.mongodb_factory import MongoDBFactory
+from database.pathmentor_repository import PathMentorRepository
 
 def generate_interactions_from_chunk(chunk):
     interactions = []
@@ -54,32 +57,23 @@ print(train_df.head())
 print("Interactions test split:")
 print(test_df.head())
 
-def serialize_interaction_from_row(builder, row):
-    return builder.serialize_interaction(
-        context_user_title=str.encode(row['context_user_title']),
-        context_user_experience=str.encode(row['context_user_experience']),
-        context_user_salary=str.encode(row['context_user_salary']),
-        context_skill=[str.encode(skill) for skill in row['context_skill']],
-        label_skill=str.encode(row['label_skill'])
-    )
+environment = os.getenv('ENVIRONMENT', 'dev')
+configuration_files = {
+    'dev': 'config_dev.json',
+    'test': 'config_test.json',
+    'prod': 'config_prod.json'
+}
 
-train_builder = InteractionTFRecordBuilder('../bin/interactions_train.tfrecord')
-for index, row in train_df.iterrows():
-    train_builder.write_example(serialize_interaction_from_row(train_builder, row))
-train_builder.close()
+configuration_file = configuration_files.get(environment)
+configuration = None
+with open(configuration_file) as file:
+    configuration = json.load(file)
 
-test_builder = InteractionTFRecordBuilder('../bin/interactions_test.tfrecord')
-for index, row in test_df.iterrows():
-    test_builder.write_example(serialize_interaction_from_row(test_builder, row))
-test_builder.close()
+secrets = dotenv_values(".env")
 
-unique_skills = interactions_df['label_skill'].unique()
-skills_df = pd.DataFrame(unique_skills, columns=['skill'])
+repository = PathMentorRepository(configuration, secrets, MongoDBFactory())
+repository.clear_collection(configuration['train_collection'])
+repository.clear_collection(configuration['test_collection'])
 
-print("Skills:")
-print(skills_df.head())
-
-skill_builder = SkillTFRecordBuilder('../bin/skills.tfrecord')
-for index, row in skills_df.iterrows():
-    skill_builder.write_example(skill_builder.serialize_skill(str.encode(row['skill'])))
-skill_builder.close()
+repository.store_records(configuration['train_collection'], train_df.to_dict('records'))
+repository.store_records(configuration['test_collection'], test_df.to_dict('records'))
