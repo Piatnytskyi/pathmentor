@@ -1,6 +1,8 @@
 {
     "database": "pathmentor",
-    "train_collection": "train",
-    "test_collection": "test"
+    "staging_database": "pathmentor_staging",
+    "interactions_train_collection": "train",
+    "interactions_test_collection": "test",
+    "skills_collection": "skills"
 }
   

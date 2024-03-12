@@ -1,15 +1,16 @@
 import json
 import os
+from bson import ObjectId
 import pandas as pd
 from dotenv import dotenv_values
+from pymongo import MongoClient
 from sklearn.model_selection import train_test_split
-from database.mongodb_factory import MongoDBFactory
-from database.pathmentor_repository import PathMentorRepository
+from tqdm import tqdm
 
 def generate_interactions_from_chunk(chunk):
     interactions = []
 
-    for index, row in chunk.iterrows():
+    for _, row in chunk.iterrows():
         skill_set = row['skill_set'].split(', ')
         if len(skill_set) < 2:
             continue
@@ -57,23 +58,53 @@ print(train_df.head())
 print("Interactions test split:")
 print(test_df.head())
 
+unique_skills = interactions_df['label_skill'].unique()
+skills_df = pd.DataFrame(unique_skills, columns=['skill'])
+
+print("Skills:")
+print(skills_df.head())
+
+secrets = dotenv_values(".env")
+
 environment = os.getenv('ENVIRONMENT', 'dev')
-configuration_files = {
+configuration_files_names = {
     'dev': 'config_dev.json',
     'test': 'config_test.json',
     'prod': 'config_prod.json'
 }
 
-configuration_file = configuration_files.get(environment)
+configuration_file = configuration_files_names.get(environment)
 configuration = None
 with open(configuration_file) as file:
     configuration = json.load(file)
 
-secrets = dotenv_values(".env")
+client = MongoClient(secrets['SRV_URI'])
+database = client[configuration['staging_database']]
 
-repository = PathMentorRepository(configuration, secrets, MongoDBFactory())
-repository.clear_collection(configuration['train_collection'])
-repository.clear_collection(configuration['test_collection'])
+required_collections = [
+    configuration['skills_collection'],
+    configuration['interactions_train_collection'],
+    configuration['interactions_test_collection']
+]
+existing_collections = database.list_collection_names()
+for collection in required_collections:
+    if collection not in existing_collections:
+        database.create_collection(collection)
+    database[collection].delete_many({})
 
-repository.store_records(configuration['train_collection'], train_df.to_dict('records'))
-repository.store_records(configuration['test_collection'], test_df.to_dict('records'))
+unique_skills_ids = {}
+for skill in tqdm(unique_skills, desc="Inserting skills"):
+    result = database.skills.insert_one({"skill": skill})
+    unique_skills_ids[skill] = result.inserted_id
+
+def insert_interactions(dataframe, collection_name, unique_skills_ids):
+    for _, row in tqdm(dataframe.iterrows(), total=dataframe.shape[0], desc=f"Inserting into {collection_name}"):
+        interaction = row.to_dict()
+        interaction['label_skill'] = unique_skills_ids[interaction['label_skill']]
+        interaction['context_skill'] = [ObjectId(unique_skills_ids[skill]) for skill in interaction['context_skill']]
+        database[collection_name].insert_one(interaction)
+
+insert_interactions(train_df, configuration['interactions_train_collection'], unique_skills_ids)
+insert_interactions(test_df, configuration['interactions_test_collection'], unique_skills_ids)
+
+print("Interactions and skills have been successfully inserted.")
