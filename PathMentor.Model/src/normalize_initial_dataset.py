@@ -72,7 +72,7 @@ for collection in required_collections:
 
 unique_skills_ids = {}
 for skill in tqdm(unique_skills, desc="Inserting skills"):
-    result = database.skills.insert_one({"skill": skill})
+    result = database[configuration['skills_collection']].insert_one({"skill": skill})
     unique_skills_ids[skill] = result.inserted_id
 
 for _, row in tqdm(interactions_df.iterrows(), total=interactions_df.shape[0], desc=f"Inserting into {configuration['interactions_collection']}"):

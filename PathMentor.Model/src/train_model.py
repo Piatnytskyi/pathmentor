@@ -1,27 +1,64 @@
+import json
+import os
 import pprint
+from dotenv import dotenv_values
 import numpy as np
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
+import tensorflow_io as tfio
 
 from model.query_model import QueryModel
 from model.candidate_model import CandidateModel
 from model.pathmentor_model import PahtmentorModel
 
-train = tf.data.TFRecordDataset("../bin/interactions_train.tfrecord")
-test = tf.data.TFRecordDataset("../bin/interactions_test.tfrecord")
-
-feature_description = {
-    'context_user_title': tf.io.FixedLenFeature([1], tf.string),
-    'context_user_experience': tf.io.FixedLenFeature([1], tf.string),
-    'context_user_salary': tf.io.FixedLenFeature([1], tf.string),
-    'context_skill': tf.io.FixedLenSequenceFeature([], tf.string, allow_missing=True),
-    'label_skill': tf.io.FixedLenFeature([1], tf.string)
+environment = os.getenv('ENVIRONMENT', 'dev')
+configuration_files_names = {
+    'dev': 'config_dev.json',
+    'test': 'config_test.json',
+    'prod': 'config_prod.json'
 }
 
-def _parse_function(example_proto):
-  return tf.io.parse_single_example(example_proto, feature_description)
+configuration_file = configuration_files_names.get(environment)
+configuration = None
+with open(configuration_file) as file:
+    configuration = json.load(file)
 
-train_ds = train.map(_parse_function).map(lambda x: {
+secrets = dotenv_values(".env")
+
+skills_ds = tfio.experimental.mongodb.MongoDBIODataset(
+    uri=secrets['SRV_URI'], database=configuration['database'], collection=configuration['skills_collection']
+)
+
+skills_specs = {
+    "_id": {
+        "$oid": tf.TensorSpec(tf.TensorShape([None]), tf.string, name="$oid")
+    },
+    "skill": tf.TensorSpec(tf.TensorShape([None]), tf.string, name="skill")
+}
+
+skills_ds = skills_ds.map(lambda x: tf.strings.as_string(tfio.experimental.serialization.decode_json(x, specs=skills_specs)["skill"]))
+  
+unique_user_skills = np.unique(np.concatenate(list(skills_ds.batch(1000))))
+
+train_ds = tfio.experimental.mongodb.MongoDBIODataset(
+    uri=secrets['SRV_URI'], database=configuration['staging_database'], collection=configuration['interactions_train_collection']
+)
+test_ds = tfio.experimental.mongodb.MongoDBIODataset(
+    uri=secrets['SRV_URI'], database=configuration['staging_database'], collection=configuration['interactions_test_collection']
+)
+
+interactions_specs = {
+    "context_user_title": tf.TensorSpec(tf.TensorShape([None]), tf.string, name="context_user_title"),
+    "context_user_experience": tf.TensorSpec(tf.TensorShape([None]), tf.string, name="context_user_experience"),
+    "context_user_salary": tf.TensorSpec(tf.TensorShape([None]), tf.string, name="context_user_salary"),
+    "context_skill": tf.RaggedTensorSpec(tf.TensorShape([None]), tf.string),
+    "label_skill": tf.TensorSpec(tf.TensorShape([None]), tf.string, name="label_skill")
+}
+
+train_ds = train_ds.map(lambda x: tfio.experimental.serialization.decode_json(x, specs=interactions_specs))
+test_ds = test_ds.map(lambda x: tfio.experimental.serialization.decode_json(x, specs=interactions_specs))
+
+train_ds = train_ds.map(lambda x: {
     "context_user_title": tf.strings.as_string(x["context_user_title"]),
     "context_user_experience": tf.strings.as_string(x["context_user_experience"]),
     "context_user_salary": tf.strings.as_string(x["context_user_salary"]),
@@ -29,33 +66,17 @@ train_ds = train.map(_parse_function).map(lambda x: {
     "label_skill": tf.strings.as_string(x["label_skill"])
 })
 
-test_ds = test.map(_parse_function).map(lambda x: {
+test_ds = test_ds.map(lambda x: {
     "context_user_title": tf.strings.as_string(x["context_user_title"]),
     "context_user_experience": tf.strings.as_string(x["context_user_experience"]),
     "context_user_salary": tf.strings.as_string(x["context_user_salary"]),
     "context_skill": tf.strings.as_string(x["context_skill"]),
     "label_skill": tf.strings.as_string(x["label_skill"])
 })
-
-for x in train_ds.take(1).as_numpy_iterator():
-  pprint.pprint(x)
 
 unique_user_titles = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_title"]))))
 unique_user_experience = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_experience"]))))
 unique_user_salary = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_salary"]))))
-
-skills = tf.data.TFRecordDataset("../bin/skills.tfrecord")
-
-feature_description = {
-    'skill': tf.io.FixedLenFeature({}, tf.string)
-}
-
-skills_ds = skills.map(_parse_function).map(lambda x: tf.strings.as_string(x["skill"]))
-
-for x in skills_ds.take(5).as_numpy_iterator():
-  pprint.pprint(x)
-
-unique_user_skills = np.unique(np.concatenate(list(skills_ds.batch(1000))))
 
 embedding_dimension = 32
 
