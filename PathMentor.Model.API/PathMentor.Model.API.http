@@ -1,0 +1,6 @@
+# @PathMentor.Model.API_HostAddress = http://localhost:5015
+
+# GET {{PathMentor.Model.API_HostAddress}}/weatherforecast/
+# Accept: application/json
+
+###
