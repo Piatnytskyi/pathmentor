@@ -25,6 +25,6 @@ namespace PathMentor.Data.Entities
         public required Skill LabelSkill { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Created { get; set; }
+        public DateTime Created { get; set; } = TimeProvider.System.GetUtcNow().DateTime;
     }
 }

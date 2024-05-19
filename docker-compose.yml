@@ -1,0 +1,21 @@
+# docker compose -f docker-compose.yml -f docker-compose.*.override.yml --env-file *.env up -d
+
+version: '3.4'
+
+services:
+  pathmentormodeldatabase:
+    image: postgres:alpine
+    container_name: pathmentor.model.database
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+
+  pathmentormodelapi:
+    image: ${DOCKER_REGISTRY-}pathmentor.model.api
+    container_name: pathmentor.model.api
+    build:
+      context: .
+      dockerfile: PathMentor.Model.API/Dockerfile
+    depends_on:
+      pathmentormodeldatabase:
+        condition: service_healthy
