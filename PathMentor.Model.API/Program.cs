@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PathMentor.Infrastructure.Services.Implementations;
 using PathMentor.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,10 +40,6 @@ app.UseCors("WebClient");
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    PathMentorModelDbContext pathMentorModelDbContext = scope.ServiceProvider.GetRequiredService<PathMentorModelDbContext>();
-    pathMentorModelDbContext.Database.Migrate();
-}
+PathMentorModelDatabaseSeeder.EnsurePopulated(app);
 
 app.Run();

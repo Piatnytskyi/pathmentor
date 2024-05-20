@@ -9,6 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["PathMentor.Model.API/PathMentor.Model.API.csproj", "PathMentor.Model.API/"]
 COPY ["PathMentor.Data/PathMentor.Data.csproj", "PathMentor.Data/"]
+COPY ["PathMentor.Infrastructure/PathMentor.Infrastructure.csproj", "PathMentor.Infrastructure/"]
 RUN dotnet restore "PathMentor.Model.API/PathMentor.Model.API.csproj"
 COPY . .
 WORKDIR "/src/PathMentor.Model.API"
