@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PathMentor.Data.Entities
+namespace PathMentor.Core.Entities
 {
     public class Interaction
     {
@@ -24,7 +22,6 @@ namespace PathMentor.Data.Entities
 
         public required Skill LabelSkill { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime Created { get; set; } = TimeProvider.System.GetUtcNow().DateTime;
     }
 }

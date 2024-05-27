@@ -26,4 +26,5 @@ services:
     volumes:
       - $HOME/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - $HOME/.aspnet/https:/root/.aspnet/https:ro
+      - $HOME/.kaggle:/root/.kaggle/:ro
       - $HOME/.vsdbg:/remote_debugger:rw

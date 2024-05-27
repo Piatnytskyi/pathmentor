@@ -1,8 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace PathMentor.Data.Entities
+namespace PathMentor.Core.Entities
 {
-    [Index(nameof(Name), IsUnique = true)]
     public class Title
     {
         public Guid Id { get; set; }

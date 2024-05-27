@@ -1,5 +1,6 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using PathMentor.Data.Entities;
+using PathMentor.Core.Entities;
 
 //dotnet ef migrations add [MigrationName] --project PathMentor.Data --startup-project PathMentor.Model.API --context PathMentorModelDbContext
 namespace PathMentor.Data
@@ -18,15 +19,8 @@ namespace PathMentor.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Skill>()
-                .HasMany(s => s.ContextInteractions)
-                .WithMany(i => i.ContextSkills);
-
-            modelBuilder.Entity<Skill>()
-                .HasMany(s => s.LabelInteractions)
-                .WithOne(i => i.LabelSkill)
-                .HasForeignKey(i => i.LabelSkillId)
-                .IsRequired();
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }

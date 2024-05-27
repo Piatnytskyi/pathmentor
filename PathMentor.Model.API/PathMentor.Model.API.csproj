@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PathMentor.Data\PathMentor.Data.csproj" />
-    <ProjectReference Include="..\PathMentor.Infrastructure\PathMentor.Infrastructure.csproj" /> 
+    <ProjectReference Include="..\PathMentor.Infrastructure\PathMentor.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
