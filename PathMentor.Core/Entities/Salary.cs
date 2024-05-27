@@ -1,8 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace PathMentor.Data.Entities
+namespace PathMentor.Core.Entities
 {
-    [Index(nameof(Range), IsUnique = true)]
     public class Salary
     {
         public Guid Id { get; set; }

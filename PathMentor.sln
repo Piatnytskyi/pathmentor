@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Data", "PathMent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Model.API", "PathMentor.Model.API\PathMentor.Model.API.csproj", "{2D79D4B5-60C6-47D6-B918-2E683E89FEF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Infrastructure", "PathMentor.Infrastructure\PathMentor.Infrastructure.csproj", "{F81BA5E3-B1BC-419D-B4D6-E96AB12D773A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Core", "PathMentor.Core\PathMentor.Core.csproj", "{452112BC-A00E-4E6A-BFC2-1A17CBAFBC92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.Contracts", "PathMentor.Contracts\PathMentor.Contracts.csproj", "{A4A8382D-9C04-4C61-AAFF-F71B2FFD1A07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +30,17 @@ Global
 		{2D79D4B5-60C6-47D6-B918-2E683E89FEF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D79D4B5-60C6-47D6-B918-2E683E89FEF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D79D4B5-60C6-47D6-B918-2E683E89FEF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F81BA5E3-B1BC-419D-B4D6-E96AB12D773A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F81BA5E3-B1BC-419D-B4D6-E96AB12D773A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F81BA5E3-B1BC-419D-B4D6-E96AB12D773A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F81BA5E3-B1BC-419D-B4D6-E96AB12D773A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{452112BC-A00E-4E6A-BFC2-1A17CBAFBC92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{452112BC-A00E-4E6A-BFC2-1A17CBAFBC92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{452112BC-A00E-4E6A-BFC2-1A17CBAFBC92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{452112BC-A00E-4E6A-BFC2-1A17CBAFBC92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4A8382D-9C04-4C61-AAFF-F71B2FFD1A07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4A8382D-9C04-4C61-AAFF-F71B2FFD1A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4A8382D-9C04-4C61-AAFF-F71B2FFD1A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4A8382D-9C04-4C61-AAFF-F71B2FFD1A07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
