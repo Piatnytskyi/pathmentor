@@ -5,6 +5,5 @@ namespace PathMentor.Core.Entities
         public Guid Id { get; set; }
         public required string Name { get; set; }
         public required ICollection<Interaction> Interactions { get; set; }
-
     }
 }

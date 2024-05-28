@@ -14,8 +14,11 @@ namespace PathMentor.Infrastructure.Services.Implementations
 
         public KaggleHttpClientFacade(IConfiguration configuration)
         {
-            string username = configuration["username"]!;
-            string key = configuration["key"]!;
+            string? username = configuration["username"];
+            string? key = configuration["key"];
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(key))
+                throw new ArgumentException("Kaggle username and key must be provided in the configuration file.");
 
             _httpClient = new HttpClient();
             var authToken = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username + ":" + key}"));
