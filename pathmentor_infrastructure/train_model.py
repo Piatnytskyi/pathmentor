@@ -7,9 +7,9 @@ import tensorflow as tf
 import tensorflow_recommenders as tfrs
 import tensorflow_io as tfio
 
-from model.query_model import QueryModel
-from model.candidate_model import CandidateModel
-from model.pathmentor_model import PahtmentorModel
+from core.query_model import QueryModel
+from core.candidate_model import CandidateModel
+from core.pathmentor_model import PahtmentorModel
 
 environment = os.getenv('ENVIRONMENT', 'dev')
 configuration_files_names = {

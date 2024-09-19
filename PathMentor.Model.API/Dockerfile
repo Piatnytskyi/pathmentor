@@ -6,6 +6,7 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG configuration=Release
 WORKDIR /src
 COPY ["PathMentor.Core/PathMentor.Core.csproj", "PathMentor.Core/"]
 COPY ["PathMentor.Data/PathMentor.Data.csproj", "PathMentor.Data/"]
@@ -15,10 +16,11 @@ COPY ["PathMentor.Model.API/PathMentor.Model.API.csproj", "PathMentor.Model.API/
 RUN dotnet restore "PathMentor.Model.API/PathMentor.Model.API.csproj"
 COPY . .
 WORKDIR "/src/PathMentor.Model.API"
-RUN dotnet build "PathMentor.Model.API.csproj" -c Debug -o /app/build
+RUN dotnet build "PathMentor.Model.API.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "PathMentor.Model.API.csproj" -c Debug -o /app/publish
+ARG configuration=Release
+RUN dotnet publish "PathMentor.Model.API.csproj" -c $configuration -o /app/publish
 
 FROM base AS final
 WORKDIR /app

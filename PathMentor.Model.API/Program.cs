@@ -9,13 +9,6 @@ builder.Services.AddDbContext<PathMentorModelDbContext>(options =>
     options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 
-builder.Configuration.AddJsonFile(
-    Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        ".kaggle/kaggle.json"),
-    optional: false,
-    reloadOnChange: true);
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
