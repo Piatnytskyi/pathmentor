@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PathMentor.Contracts.Skills.Responses;
 
 namespace PathMentor.Model.API.Controllers
 {
@@ -9,9 +10,9 @@ namespace PathMentor.Model.API.Controllers
         // GET: api/skills/all
         [HttpGet]
         [Route("all")]
-        public ActionResult<IEnumerable<string>> Get()
+        public async Task<ActionResult<IEnumerable<SkillResponse>>> GetAsync()
         {
-            var skills = new List<string> { "C#", "Java", "Python" };
+            List<string> skills = new List<string> { "C#", "Java", "Python" };
             return Ok(skills);
         }
     }

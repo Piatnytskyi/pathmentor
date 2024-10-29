@@ -23,6 +23,8 @@ builder.Services.AddCors(builder =>
     });
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -39,10 +41,8 @@ app.UseCors("WebClient");
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    PathMentorModelDbContext pathMentorModelDbContext = scope.ServiceProvider.GetRequiredService<PathMentorModelDbContext>();
-    pathMentorModelDbContext.Database.Migrate();
-}
+app.MapHealthChecks("/health");
+
+await PathMentorModelDatabaseSeeder.EnsurePopulated(app);
 
 app.Run();

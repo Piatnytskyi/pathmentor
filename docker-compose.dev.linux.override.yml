@@ -2,10 +2,19 @@ version: '3.4'
 
 services:
   pathmentormodeldatabase:
+    image: postgres:alpine
+    container_name: pathmentor.model.database
     environment:
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: pathmentormodel
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     healthcheck:
@@ -32,3 +41,6 @@ services:
       - $HOME/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - $HOME/.aspnet/https:/root/.aspnet/https:ro
       - $HOME/.vsdbg:/remote_debugger:rw
+    depends_on:
+      pathmentormodeldatabase:
+        condition: service_healthy

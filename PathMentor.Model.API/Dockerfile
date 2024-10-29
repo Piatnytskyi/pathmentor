@@ -1,4 +1,3 @@
-
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER root
 WORKDIR /app
@@ -18,6 +17,7 @@ FROM build AS publish
 RUN dotnet publish "PathMentor.Model.API.csproj" -c Debug -o /app/publish
 
 FROM base AS final
+RUN apt-get update && apt-get install -y curl
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PathMentor.Model.API.dll"]
