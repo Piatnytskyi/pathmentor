@@ -1,4 +1,8 @@
 from mediatr import Mediator
 from pathmentor_usecases.dataset.commands.build_dataset_command_handler import BuildDatasetCommandHandler
+from pathmentor_usecases.dataset.commands.prepare_dataset_command_handler import PrepareDatasetCommandHandler
+from pathmentor_usecases.dataset.commands.normalize_dataset_command_handler import NormalizeDatasetCommandHandler
 
 Mediator.register_handler(BuildDatasetCommandHandler)
+Mediator.register_handler(PrepareDatasetCommandHandler)
+Mediator.register_handler(NormalizeDatasetCommandHandler)
