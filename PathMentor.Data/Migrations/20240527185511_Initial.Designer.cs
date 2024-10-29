@@ -12,7 +12,7 @@ using PathMentor.Data;
 namespace PathMentor.Data.Migrations
 {
     [DbContext(typeof(PathMentorModelDbContext))]
-    [Migration("20240425173051_Initial")]
+    [Migration("20240527185511_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace PathMentor.Data.Migrations
                     b.ToTable("InteractionSkill");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Experience", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Experience", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -58,14 +58,13 @@ namespace PathMentor.Data.Migrations
                     b.ToTable("Experiences");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Interaction", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Interaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Created")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ExperienceId")
@@ -93,7 +92,7 @@ namespace PathMentor.Data.Migrations
                     b.ToTable("Interactions");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Salary", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Salary", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,7 +110,7 @@ namespace PathMentor.Data.Migrations
                     b.ToTable("Salaries");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Skill", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Skill", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,7 +128,7 @@ namespace PathMentor.Data.Migrations
                     b.ToTable("Skills");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Title", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Title", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,40 +148,40 @@ namespace PathMentor.Data.Migrations
 
             modelBuilder.Entity("InteractionSkill", b =>
                 {
-                    b.HasOne("PathMentor.Data.Entities.Interaction", null)
+                    b.HasOne("PathMentor.Core.Entities.Interaction", null)
                         .WithMany()
                         .HasForeignKey("ContextInteractionsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PathMentor.Data.Entities.Skill", null)
+                    b.HasOne("PathMentor.Core.Entities.Skill", null)
                         .WithMany()
                         .HasForeignKey("ContextSkillsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Interaction", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Interaction", b =>
                 {
-                    b.HasOne("PathMentor.Data.Entities.Experience", "Experience")
+                    b.HasOne("PathMentor.Core.Entities.Experience", "Experience")
                         .WithMany("Interactions")
                         .HasForeignKey("ExperienceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PathMentor.Data.Entities.Skill", "LabelSkill")
+                    b.HasOne("PathMentor.Core.Entities.Skill", "LabelSkill")
                         .WithMany("LabelInteractions")
                         .HasForeignKey("LabelSkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PathMentor.Data.Entities.Salary", "Salary")
+                    b.HasOne("PathMentor.Core.Entities.Salary", "Salary")
                         .WithMany("Interactions")
                         .HasForeignKey("SalaryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PathMentor.Data.Entities.Title", "Title")
+                    b.HasOne("PathMentor.Core.Entities.Title", "Title")
                         .WithMany("Interactions")
                         .HasForeignKey("TitleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -197,22 +196,22 @@ namespace PathMentor.Data.Migrations
                     b.Navigation("Title");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Experience", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Experience", b =>
                 {
                     b.Navigation("Interactions");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Salary", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Salary", b =>
                 {
                     b.Navigation("Interactions");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Skill", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Skill", b =>
                 {
                     b.Navigation("LabelInteractions");
                 });
 
-            modelBuilder.Entity("PathMentor.Data.Entities.Title", b =>
+            modelBuilder.Entity("PathMentor.Core.Entities.Title", b =>
                 {
                     b.Navigation("Interactions");
                 });

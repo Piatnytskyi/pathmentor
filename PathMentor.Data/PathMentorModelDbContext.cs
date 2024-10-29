@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
@@ -33,15 +34,8 @@ namespace PathMentor.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Skill>()
-                .HasMany(s => s.ContextInteractions)
-                .WithMany(i => i.ContextSkills);
-
-            modelBuilder.Entity<Skill>()
-                .HasMany(s => s.LabelInteractions)
-                .WithOne(i => i.LabelSkill)
-                .HasForeignKey(i => i.LabelSkillId)
-                .IsRequired();
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }
