@@ -1,4 +1,4 @@
-namespace PathMentor.Contracts.Kaggle
+namespace PathMentor.Contracts.Kaggle.Responses
 {
     public class CompetitionsListResponse
     {

@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using PathMentor.Contracts.Kaggle;
+using PathMentor.Contracts.Kaggle.Responses;
 
 namespace PathMentor.Infrastructure.Services.Implementations
 {
@@ -14,8 +14,11 @@ namespace PathMentor.Infrastructure.Services.Implementations
 
         public KaggleHttpClientFacade(IConfiguration configuration)
         {
-            string username = configuration["username"]!;
-            string key = configuration["key"]!;
+            string? username = configuration["username"];
+            string? key = configuration["key"];
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(key))
+                throw new ArgumentException("Kaggle username and key must be provided in the configuration file.");
 
             _httpClient = new HttpClient();
             var authToken = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username + ":" + key}"));
@@ -39,7 +42,6 @@ namespace PathMentor.Infrastructure.Services.Implementations
         public async Task DownloadCompetitionFilesAsync(string competitionName, string targetDirectory)
         {
             CompetitionsListResponse? competitionsList = await _httpClient.GetFromJsonAsync<CompetitionsListResponse>(_baseApiUrl + "competitions/data/list/" + competitionName);
-
             if (competitionsList == null)
                 return;
 

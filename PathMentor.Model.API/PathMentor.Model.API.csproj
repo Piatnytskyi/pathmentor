@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -18,7 +19,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PathMentor.Data\PathMentor.Data.csproj" />
-    <ProjectReference Include="..\PathMentor.Infrastructure\PathMentor.Infrastructure.csproj" />
+    <ProjectReference Include="..\PathMentor.Contracts\PathMentor.Contracts.csproj" /> 
+    <ProjectReference Include="..\PathMentor.Infrastructure\PathMentor.Infrastructure.csproj" /> 
+    <ProjectReference Include="..\PathMentor.UseCases\PathMentor.UseCases.csproj" />
   </ItemGroup>
 
 </Project>

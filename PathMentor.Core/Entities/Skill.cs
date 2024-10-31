@@ -6,6 +6,5 @@ namespace PathMentor.Core.Entities
         public required string Name { get; set; }
         public required ICollection<Interaction> ContextInteractions { get; set; }
         public required ICollection<Interaction> LabelInteractions { get; set; }
-
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PathMentor.UseCases;
 using PathMentor.Infrastructure.Services.Implementations;
 using PathMentor.Data;
 
@@ -8,6 +9,9 @@ builder.Services.AddDbContext<PathMentorModelDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
+builder.Services.AddUseCases();
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<KaggleHttpClientFacade>();
 
 builder.Configuration.AddJsonFile(
     Path.Combine(
@@ -31,6 +35,8 @@ builder.Services.AddCors(builder =>
     });
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -46,6 +52,8 @@ app.UseAuthorization();
 app.UseCors("WebClient");
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 await PathMentorModelDatabaseSeeder.EnsurePopulated(app);
 
