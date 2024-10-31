@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PathMentor.UseCases;
 using PathMentor.Infrastructure.Services.Implementations;
 using PathMentor.Data;
 
@@ -8,6 +9,16 @@ builder.Services.AddDbContext<PathMentorModelDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
+builder.Services.AddUseCases();
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<KaggleHttpClientFacade>();
+
+builder.Configuration.AddJsonFile(
+    Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".kaggle/kaggle.json"),
+    optional: false,
+    reloadOnChange: true);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

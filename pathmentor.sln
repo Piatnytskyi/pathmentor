@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PathMentor.Core", "PathMent
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PathMentor.Contracts", "PathMentor.Contracts\PathMentor.Contracts.csproj", "{7DC5E3F8-4F63-4800-844D-C314CFF7FF3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathMentor.UseCases", "PathMentor.UseCases\PathMentor.UseCases.csproj", "{2192C476-4184-4331-BF03-FCF6C52820B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{7DC5E3F8-4F63-4800-844D-C314CFF7FF3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DC5E3F8-4F63-4800-844D-C314CFF7FF3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DC5E3F8-4F63-4800-844D-C314CFF7FF3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2192C476-4184-4331-BF03-FCF6C52820B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2192C476-4184-4331-BF03-FCF6C52820B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2192C476-4184-4331-BF03-FCF6C52820B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2192C476-4184-4331-BF03-FCF6C52820B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
