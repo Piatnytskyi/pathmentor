@@ -12,7 +12,7 @@ using PathMentor.Data;
 namespace PathMentor.Data.Migrations
 {
     [DbContext(typeof(PathMentorModelDbContext))]
-    [Migration("20240527185511_Initial")]
+    [Migration("20241119190929_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -48,7 +48,8 @@ namespace PathMentor.Data.Migrations
 
                     b.Property<string>("Range")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -100,7 +101,8 @@ namespace PathMentor.Data.Migrations
 
                     b.Property<string>("Range")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -118,7 +120,8 @@ namespace PathMentor.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -136,7 +139,8 @@ namespace PathMentor.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 

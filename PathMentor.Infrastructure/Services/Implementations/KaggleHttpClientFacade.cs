@@ -36,7 +36,7 @@ namespace PathMentor.Infrastructure.Services.Implementations
                 await responseStream.CopyToAsync(fileStream);
             
             if (unzip)
-                ZipFile.ExtractToDirectory(targetPath, targetDirectory);
+                ZipFile.ExtractToDirectory(targetPath, targetDirectory, true);
         }
 
         public async Task DownloadCompetitionFilesAsync(string competitionName, string targetDirectory)

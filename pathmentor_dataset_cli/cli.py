@@ -1,3 +1,5 @@
+from pathlib import Path
+import tempfile
 from mediatr import Mediator 
 from typing import List, Optional
 
@@ -13,9 +15,11 @@ app = typer.Typer()
 mediator = Mediator()
 
 @app.command()
-def build() -> None:
-    """Builds the initial dataset"""
-    request = BuildDatasetCommand()
+def build(
+        source_path: Path = typer.Argument(..., exists=True, dir_okay=True, readable=True, resolve_path=True),
+        output_path: Path = typer.Argument(..., dir_okay=True, file_okay=True, writable=True, resolve_path=True)
+    ) -> None:
+    request = BuildDatasetCommand(source_path, output_path)
     result, error = mediator.send(request)
     if error:
         typer.secho(
@@ -23,35 +27,39 @@ def build() -> None:
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-dataset: intial dataset was built """,
+            f"""pathmentor-dataset: intial dataset was built {result}""",
             fg=typer.colors.GREEN)
 
 @app.command()
-def prepare() -> None:
-    """Prepare the initial dataset"""
-    request = PrepareDatasetCommand()
-    _, error = mediator.send(request)
+def prepare(
+        built_dataset_path: Path = typer.Argument(..., exists=True, file_okay=True, readable=True, resolve_path=True),
+        output_path: Path = typer.Argument(..., dir_okay=True, file_okay=True, writable=True, resolve_path=True)
+    ) -> None:
+    request = PrepareDatasetCommand(built_dataset_path, output_path)
+    result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Building dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Preparing dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-dataset: intial dataset was built """,
+            f"""pathmentor-dataset: intial dataset was prepared {result}""",
             fg=typer.colors.GREEN)
 
 @app.command()
-def normalize(connection_string: str = typer.Argument(envvar="CONNECTION_STRING")) -> None:
-    """Normalize the initial dataset"""
-    request = NormalizeDatasetCommand(connection_string)
-    _, error = mediator.send(request)
+def normalize(
+        prepared_dataset_path: Path = typer.Argument(..., exists=True, file_okay=True, readable=True, resolve_path=True),
+        connection_string: str = typer.Argument(envvar="ConnectionStrings__DefaultConnection")
+    ) -> None:
+    request = NormalizeDatasetCommand(prepared_dataset_path, connection_string)
+    result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Building dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Normalizing dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-dataset: intial dataset was built """,
+            f"""pathmentor-dataset: intial dataset was normalized {result}""",
             fg=typer.colors.GREEN)
 
 def _version_callback(value: bool) -> None:
