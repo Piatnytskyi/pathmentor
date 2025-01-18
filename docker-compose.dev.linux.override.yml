@@ -26,8 +26,6 @@ services:
       - ASPNETCORE_HTTPS_PORTS=443
       - ConnectionStrings__DefaultConnection=Host=pathmentor.model.database; Port=5432; Database=pathmentormodel; Username=${POSTGRES_USER}; Password=${POSTGRES_PASSWORD}; CommandTimeout=120;
     build:
-      context: .
-      dockerfile: PathMentor.Model.API/Dockerfile
       args:
         - configuration=Debug
     ports:

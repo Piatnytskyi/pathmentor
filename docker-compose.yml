@@ -8,7 +8,7 @@ services:
     container_name: pathmentor.model.api
     build:
       context: .
-      dockerfile: pathmentor_dataset_cli/Dockerfile
+      dockerfile: PathMentor.Model.API/Dockerfile
     depends_on:
       pathmentordatasetcli:
         condition: service_completed_successfully
