@@ -5,27 +5,17 @@ FROM python:${PYTHON_VERSION}-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+FROM base AS publish
 WORKDIR /app
+COPY ["pathmentor_core", "pathmentor_core"]
+COPY ["pathmentor_infrastructure", "pathmentor_infrastructure"]
+COPY ["pathmentor_usecases", "pathmentor_usecases"]
+COPY ["pathmentor_dataset_cli", "pathmentor_dataset_cli"]
+RUN python -m pip install -r pathmentor_dataset_cli/requirements.txt
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG configuration=Release
-WORKDIR /src
-COPY ["PathMentor.Core/PathMentor.Core.csproj", "PathMentor.Core/"]
-COPY ["PathMentor.Data/PathMentor.Data.csproj", "PathMentor.Data/"]
-COPY ["PathMentor.Infrastructure/PathMentor.Infrastructure.csproj", "PathMentor.Infrastructure/"]
-RUN dotnet restore "PathMentor.Infrastructure/PathMentor.Infrastructure.csproj"
-COPY . .
-WORKDIR "/src/PathMentor.Infrastructure"
-RUN dotnet build "PathMentor.Infrastructure.csproj" -c $configuration -o /app/build
-
-FROM build AS publish
-ARG configuration=Release
-RUN dotnet publish "PathMentor.Infrastructure.csproj" -c $configuration -o /app/publish
-
-FROM base AS final
+FROM publish AS etl
 WORKDIR /app
-COPY --from=publish /app/publish .
-
-RUN python -m pip install -r requirements.txt
-
-ENTRYPOINT ["python", "-m", "pathmentor_dataset_cli/__main__.py"]
+COPY --from=publish /app .
+ENTRYPOINT python -m pathmentor_dataset_cli build pathmentor_dataset_cli/bin/built_database.csv && \
+    python -m pathmentor_dataset_cli prepare pathmentor_dataset_cli/bin/built_database.csv pathmentor_dataset_cli/bin/prepared_database.csv && \
+    python -m pathmentor_dataset_cli normalize pathmentor_dataset_cli/bin/prepared_database.csv

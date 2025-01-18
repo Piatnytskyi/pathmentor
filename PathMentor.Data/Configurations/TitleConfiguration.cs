@@ -6,6 +6,7 @@ public class TitleConfiguration : IEntityTypeConfiguration<Title>
 {
     public void Configure(EntityTypeBuilder<Title> builder)
     {
-        builder.HasIndex(e => e.Name).IsUnique();
+        builder.Property(t => t.Name).HasMaxLength(100).IsRequired();
+        builder.HasIndex(t => t.Name).IsUnique();
     }
 }

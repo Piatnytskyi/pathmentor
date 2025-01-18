@@ -1,29 +1,21 @@
 using PathMentor.Data;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 namespace PathMentor.Infrastructure.Services.Implementations
 {
     public class PathMentorModelDatabaseSeeder
     {
-        public static async Task EnsurePopulated(IApplicationBuilder app)
+        public static async Task EnsurePopulated(
+            PathMentorModelDbContext context)
         {
-            using (var scope = app.ApplicationServices.CreateScope())
+            if (context.Database.GetPendingMigrations().Any())
             {
-                KaggleHttpClientFacade kaggleHttpClientFacade = scope.ServiceProvider.GetRequiredService<KaggleHttpClientFacade>();
-                await Task.WhenAll(
-                    kaggleHttpClientFacade.DownloadDatasetFilesAsync("kaggle/kaggle-survey-2018", "datasets", true),
-                    kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2020", "datasets"),
-                    kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2021", "datasets"),
-                    kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2022", "datasets")
-                );
+                context.Database.Migrate();
+            }
 
-                PathMentorModelDbContext context = scope.ServiceProvider.GetRequiredService<PathMentorModelDbContext>();   
-                if (context.Database.GetPendingMigrations().Any())
-                {
-                    context.Database.Migrate();
-                }
+            if (context.Interactions.Any())
+            {
+                return;
             }
         }
     }

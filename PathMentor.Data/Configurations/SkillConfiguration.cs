@@ -6,7 +6,8 @@ public class Skillonfiguration : IEntityTypeConfiguration<Skill>
 {
     public void Configure(EntityTypeBuilder<Skill> builder)
     {
-        builder.HasIndex(e => e.Name).IsUnique();
+        builder.Property(s => s.Name).HasMaxLength(100).IsRequired();
+        builder.HasIndex(s => s.Name).IsUnique();
 
         builder.HasMany(s => s.ContextInteractions)
             .WithMany(i => i.ContextSkills);

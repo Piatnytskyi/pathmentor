@@ -36,8 +36,16 @@ services:
     volumes:
       - $HOME/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - $HOME/.aspnet/https:/root/.aspnet/https:ro
-      - $HOME/.kaggle:/root/.kaggle/:ro
       - $HOME/.vsdbg:/remote_debugger:rw
+    depends_on:
+      pathmentormodeldatabase:
+        condition: service_healthy
+
+  pathmentordatasetcli:
+    environment:
+      - ConnectionStrings__DefaultConnection=host=pathmentor.model.database port=5432 dbname=pathmentormodel user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}
+    volumes:
+      - $HOME/.kaggle:/root/.kaggle/:ro
     depends_on:
       pathmentormodeldatabase:
         condition: service_healthy

@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: pathmentor_dataset_cli build",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pathmentor_dataset_cli",
+            "args": ["build", "pathmentor_dataset_cli/bin", "pathmentor_dataset_cli/bin/built_database.csv"],
+            "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
+        },
+        {
+            "name": "Python Debugger: pathmentor_dataset_cli normalize",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pathmentor_dataset_cli",
+            "args": ["normalize", "pathmentor_dataset_cli/bin/prepared_database.csv"],
+            "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
+        },
+        {
             "name": "Docker .NET Attach (Preview)",
             "type": "docker",
             "request": "attach",
@@ -12,6 +28,16 @@
             "sourceFileMap": {
                 "/src": "${workspaceFolder}"
             }
+        },
+        {
+            "name": "Attach to Python Functions",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 9091
+            },
+            "preLaunchTask": "func: host start"
         }
     ]
 }

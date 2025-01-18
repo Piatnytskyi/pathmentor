@@ -35,7 +35,7 @@ namespace PathMentor.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(PathMentorModelDbContext).Assembly);
         }
     }
 }
