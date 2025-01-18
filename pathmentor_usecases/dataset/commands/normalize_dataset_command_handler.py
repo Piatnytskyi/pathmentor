@@ -7,7 +7,7 @@ class NormalizeDatasetCommandHandler():
     def handle(self, request: NormalizeDatasetCommand):
         pathmentor_dataset_builder = PathMentorDatasetBuilder()
         try:
-            pathmentor_dataset_builder.normalize(request.prepared_dataset_path, request.connection_string)
+            pathmentor_dataset_builder.normalize(request.prepared_dataset_path, request.connection_string, request.force)
         except FileNotFoundError as e:
             return None, FILE_ERROR
         except psycopg.OperationalError as e:

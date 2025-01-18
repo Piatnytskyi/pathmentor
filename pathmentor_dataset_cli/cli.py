@@ -16,10 +16,9 @@ mediator = Mediator()
 
 @app.command()
 def build(
-        source_path: Path = typer.Argument(..., exists=True, dir_okay=True, readable=True, resolve_path=True),
         output_path: Path = typer.Argument(..., dir_okay=True, file_okay=True, writable=True, resolve_path=True)
     ) -> None:
-    request = BuildDatasetCommand(source_path, output_path)
+    request = BuildDatasetCommand(output_path)
     result, error = mediator.send(request)
     if error:
         typer.secho(
@@ -49,9 +48,10 @@ def prepare(
 @app.command()
 def normalize(
         prepared_dataset_path: Path = typer.Argument(..., exists=True, file_okay=True, readable=True, resolve_path=True),
-        connection_string: str = typer.Argument(envvar="ConnectionStrings__DefaultConnection")
+        connection_string: str = typer.Argument(envvar="ConnectionStrings__DefaultConnection"),
+        force: bool = typer.Option(False, "--force", "-f")
     ) -> None:
-    request = NormalizeDatasetCommand(prepared_dataset_path, connection_string)
+    request = NormalizeDatasetCommand(prepared_dataset_path, connection_string, force)
     result, error = mediator.send(request)
     if error:
         typer.secho(

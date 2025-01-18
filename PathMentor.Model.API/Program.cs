@@ -9,16 +9,9 @@ builder.Services.AddDbContext<PathMentorModelDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
+
 builder.Services.AddUseCases();
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<KaggleHttpClientFacade>();
-
-builder.Configuration.AddJsonFile(
-    Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        ".kaggle/kaggle.json"),
-    optional: false,
-    reloadOnChange: true);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,6 +48,10 @@ app.MapControllers();
 
 app.MapHealthChecks("/health");
 
-await PathMentorModelDatabaseSeeder.EnsurePopulated(app);
+using (var scope = app.Services.CreateScope())
+{
+    await PathMentorModelDatabaseSeeder.EnsurePopulated(
+        scope.ServiceProvider.GetRequiredService<PathMentorModelDbContext>());
+}
 
 app.Run();

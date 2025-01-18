@@ -6,7 +6,7 @@ class BuildDatasetCommandHandler():
     def handle(self, request: BuildDatasetCommand):
         pathmentor_dataset_builder = PathMentorDatasetBuilder()
         try:
-            built_dataset_path = pathmentor_dataset_builder.build(request.source_path, request.output_path)
+            built_dataset_path = pathmentor_dataset_builder.build(request.output_path)
         except FileNotFoundError as e:
             return None, FILE_ERROR
         except PermissionError as e:

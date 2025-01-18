@@ -1,4 +1,6 @@
 import os
+import zipfile
+from kaggle.api.kaggle_api_extended import KaggleApi
 from decimal import Decimal
 from pathlib import Path
 import numpy as np
@@ -8,15 +10,31 @@ import psycopg
 from tqdm import tqdm
 
 ##TODO: Extend with logging
-class PathMentorDatasetBuilder:       
-    def build(self, source_path: Path, output_path: Path) -> Path:
-        df_2018 = pd.read_csv(source_path / 'multipleChoiceResponses.csv', low_memory=False, header=[0,1])
+class PathMentorDatasetBuilder:
+    def build(self, output_path: Path) -> Path:
+        output_folder = output_path.parent
+        
+        kaggle_api = KaggleApi()
+        kaggle_api.authenticate()
+        
+        kaggle_api.dataset_download_files('kaggle/kaggle-survey-2018', output_folder, unzip=True)
+        kaggle_api.competition_download_files('kaggle-survey-2020', output_folder)
+        with zipfile.ZipFile(output_folder / 'kaggle-survey-2020.zip', 'r') as zip_ref:
+            zip_ref.extractall(output_folder)
+        kaggle_api.competition_download_files('kaggle-survey-2021', output_folder)
+        with zipfile.ZipFile(output_folder / 'kaggle-survey-2021.zip', 'r') as zip_ref:
+            zip_ref.extractall(output_folder)
+        kaggle_api.competition_download_files('kaggle-survey-2022', output_folder)
+        with zipfile.ZipFile(output_folder / 'kaggle-survey-2022.zip', 'r') as zip_ref:
+            zip_ref.extractall(output_folder)
+
+        df_2018 = pd.read_csv(output_folder / 'multipleChoiceResponses.csv', low_memory=False, header=[0,1])
         questions_2018 = pd.DataFrame(list(zip(df_2018.columns.get_level_values(0), df_2018.columns.get_level_values(1))))
-        df_2020 = pd.read_csv(source_path / 'kaggle_survey_2020_responses.csv', low_memory=False, header=[0,1])
+        df_2020 = pd.read_csv(output_folder / 'kaggle_survey_2020_responses.csv', low_memory=False, header=[0,1])
         questions_2020 = pd.DataFrame(list(zip(df_2020.columns.get_level_values(0), df_2020.columns.get_level_values(1))))
-        df_2021 = pd.read_csv(source_path / 'kaggle_survey_2021_responses.csv', low_memory=False, header=[0,1])
+        df_2021 = pd.read_csv(output_folder / 'kaggle_survey_2021_responses.csv', low_memory=False, header=[0,1])
         questions_2021 = pd.DataFrame(list(zip(df_2021.columns.get_level_values(0), df_2021.columns.get_level_values(1))))
-        df_2022 = pd.read_csv(source_path / 'kaggle_survey_2022_responses.csv', low_memory=False, header=[0,1])
+        df_2022 = pd.read_csv(output_folder / 'kaggle_survey_2022_responses.csv', low_memory=False, header=[0,1])
         questions_2022 = pd.DataFrame(list(zip(df_2022.columns.get_level_values(0), df_2022.columns.get_level_values(1))))
 
         df_2018.columns = df_2018.columns.droplevel(1)
@@ -466,7 +484,7 @@ class PathMentorDatasetBuilder:
         
         return interactions
 
-    def normalize(self, prepared_dataset_path: Path, connection_string: str) -> None:
+    def normalize(self, prepared_dataset_path: Path, connection_string: str, force: bool = False) -> None:
         interactions = []
         for chunk in pd.read_csv(prepared_dataset_path, sep='\t', chunksize=10000):
             interactions.extend(self.__generate_interactions_from_chunk(chunk))
@@ -484,45 +502,77 @@ class PathMentorDatasetBuilder:
 
         with psycopg.connect(connection_string) as connection:
             with connection.cursor() as cursor:
+                if force:
+                    print("Force flag provided, purging database tables.")
+                    cursor.execute("TRUNCATE TABLE \"Skills\" CASCADE;")
+                    cursor.execute("TRUNCATE TABLE \"Titles\" CASCADE;")
+                    cursor.execute("TRUNCATE TABLE \"Experiences\" CASCADE;")
+                    cursor.execute("TRUNCATE TABLE \"Salaries\" CASCADE;")
+                    cursor.execute("TRUNCATE TABLE \"Interactions\" CASCADE;")
+                    cursor.execute("TRUNCATE TABLE \"InteractionSkill\" CASCADE;")
+                    connection.commit()
+
                 unique_skills_ids = {}
                 for skill in tqdm(unique_skills, desc="Inserting skills"):
-                    unique_skills_ids[skill] = cursor.execute("INSERT INTO \"Skills\" (\"Id\",\"Name\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (skill,)).fetchone()[0]
+                    cursor.execute("SELECT \"Id\" FROM \"Skills\" WHERE \"Name\" = %s;", (skill,))
+                    skill_id = cursor.fetchone()
+                    if skill_id is None:
+                        skill_id = cursor.execute("INSERT INTO \"Skills\" (\"Id\",\"Name\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (skill,)).fetchone()[0]
+                    else:
+                        skill_id = skill_id[0]
+                    unique_skills_ids[skill] = skill_id
+
+                connection.commit()
 
                 for _, row in tqdm(interactions_df.iterrows(), total=interactions_df.shape[0], desc="Inserting interactions"):
                     interaction = row.to_dict()
                     
-                    title_id = cursor.execute("INSERT INTO \"Titles\" (\"Id\",\"Name\") VALUES (gen_random_uuid(), %s) ON CONFLICT (\"Name\") DO NOTHING RETURNING \"Id\";", (interaction['context_user_title'],)).fetchone()
+                    cursor.execute("SELECT \"Id\" FROM \"Titles\" WHERE \"Name\" = %s;", (interaction['context_user_title'],))
+                    title_id = cursor.fetchone()
                     if title_id is None:
-                        title_id = cursor.execute("SELECT \"Id\" FROM \"Titles\" WHERE \"Name\" = %s;", (interaction['context_user_title'],)).fetchone()[0]
+                        title_id = cursor.execute("INSERT INTO \"Titles\" (\"Id\",\"Name\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_title'],)).fetchone()[0]
                     else:
                         title_id = title_id[0]
                     
-                    experience_id = cursor.execute("INSERT INTO \"Experiences\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) ON CONFLICT (\"Range\") DO NOTHING RETURNING \"Id\";", (interaction['context_user_experience'],)).fetchone()
+                    cursor.execute("SELECT \"Id\" FROM \"Experiences\" WHERE \"Range\" = %s;", (interaction['context_user_experience'],))
+                    experience_id = cursor.fetchone()
                     if experience_id is None:
-                        experience_id = cursor.execute("SELECT \"Id\" FROM \"Experiences\" WHERE \"Range\" = %s;", (interaction['context_user_experience'],)).fetchone()[0]
+                        experience_id = cursor.execute("INSERT INTO \"Experiences\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_experience'],)).fetchone()[0]
                     else:
                         experience_id = experience_id[0]
         
-                    salary_id = cursor.execute("INSERT INTO \"Salaries\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) ON CONFLICT (\"Range\") DO NOTHING RETURNING \"Id\";", (interaction['context_user_salary'],)).fetchone()
+                    cursor.execute("SELECT \"Id\" FROM \"Salaries\" WHERE \"Range\" = %s;", (interaction['context_user_salary'],))
+                    salary_id = cursor.fetchone()
                     if salary_id is None:
-                        salary_id = cursor.execute("SELECT \"Id\" FROM \"Salaries\" WHERE \"Range\" = %s;", (interaction['context_user_salary'],)).fetchone()[0]
+                        salary_id = cursor.execute("INSERT INTO \"Salaries\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_salary'],)).fetchone()[0]
                     else:
                         salary_id = salary_id[0]
 
                     label_skill_id = unique_skills_ids[interaction['label_skill']]
 
-                    interaction_id = cursor.execute("""
-                        INSERT INTO \"Interactions\" (
-                            \"Id\", \"TitleId\", \"ExperienceId\", \"SalaryId\", \"LabelSkillId\", \"Created\"
-                        ) VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW() AT TIME ZONE 'UTC') RETURNING \"Id\";
-                        """, (title_id, experience_id, salary_id, label_skill_id)).fetchone()[0]
+                    cursor.execute("""
+                        SELECT \"Id\" FROM \"Interactions\" WHERE \"TitleId\" = %s AND \"ExperienceId\" = %s AND \"SalaryId\" = %s AND \"LabelSkillId\" = %s;
+                        """, (title_id, experience_id, salary_id, label_skill_id))
+                    interaction_id = cursor.fetchone()
+                    if interaction_id is None:
+                        interaction_id = cursor.execute("""
+                            INSERT INTO \"Interactions\" (
+                                \"Id\", \"TitleId\", \"ExperienceId\", \"SalaryId\", \"LabelSkillId\", \"Created\"
+                            ) VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW() AT TIME ZONE 'UTC') RETURNING \"Id\";
+                            """, (title_id, experience_id, salary_id, label_skill_id)).fetchone()[0]
+                    else:
+                        interaction_id = interaction_id[0]
                     
                     context_skill_ids = [unique_skills_ids[skill] for skill in interaction['context_skill']]
                     for context_skill_id in context_skill_ids:
                         cursor.execute("""
-                            INSERT INTO \"InteractionSkill\" (\"ContextInteractionsId\", \"ContextSkillsId\") VALUES (%s, %s);
+                            SELECT 1 FROM \"InteractionSkill\" WHERE \"ContextInteractionsId\" = %s AND \"ContextSkillsId\" = %s;
                             """, (interaction_id, context_skill_id))
-
-                connection.commit()
+                        if cursor.fetchone() is None:
+                            cursor.execute("""
+                                INSERT INTO \"InteractionSkill\" (\"ContextInteractionsId\", \"ContextSkillsId\") VALUES (%s, %s);
+                                """, (interaction_id, context_skill_id))
+                            
+                    connection.commit()
 
         print("Interactions and skills have been successfully inserted.")
