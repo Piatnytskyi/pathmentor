@@ -9,7 +9,11 @@
             "type": "debugpy",
             "request": "launch",
             "module": "pathmentor_dataset_cli",
-            "args": ["build", "pathmentor_dataset_cli/bin", "pathmentor_dataset_cli/bin/built_database.csv"],
+            "args": [
+                "build",
+                "pathmentor_dataset_cli/bin",
+                "pathmentor_dataset_cli/bin/built_database.csv"
+            ],
             "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
         },
         {
@@ -17,7 +21,10 @@
             "type": "debugpy",
             "request": "launch",
             "module": "pathmentor_dataset_cli",
-            "args": ["normalize", "pathmentor_dataset_cli/bin/prepared_database.csv"],
+            "args": [
+                "normalize",
+                "pathmentor_dataset_cli/bin/prepared_database.csv"
+            ],
             "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
         },
         {
