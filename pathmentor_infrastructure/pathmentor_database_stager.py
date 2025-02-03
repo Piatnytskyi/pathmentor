@@ -2,7 +2,7 @@ import pandas as pd
 import psycopg
 from sklearn.model_selection import train_test_split
 
-class PathMentorDatasetStager:
+class PathMentorDatabaseStager:
     def stage(self, connection_string: str) -> None:
         with psycopg.connect(connection_string) as connection:
             with connection.cursor() as cursor:
