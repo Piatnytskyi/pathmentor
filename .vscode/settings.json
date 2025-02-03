@@ -1,9 +1,8 @@
 {
     "dotnet.defaultSolution": "PathMentor.sln",
-    "azureFunctions.deploySubpath": "pathmentor_functions",
-    "azureFunctions.scmDoBuildDuringDeployment": true,
-    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.deploySubpath": "PathMentor.Functions/bin/Release/net8.0/publish",
+    "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.projectLanguageModel": 2
+    "azureFunctions.preDeployTask": "publish (functions)"
 }

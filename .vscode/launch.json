@@ -37,14 +37,10 @@
             }
         },
         {
-            "name": "Attach to Python Functions",
-            "type": "debugpy",
+            "name": "Attach to .NET Functions",
+            "type": "coreclr",
             "request": "attach",
-            "connect": {
-                "host": "localhost",
-                "port": 9091
-            },
-            "preLaunchTask": "func: host start"
+            "processId": "${command:azureFunctions.pickProcess}"
         }
     ]
 }
