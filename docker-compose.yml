@@ -17,10 +17,3 @@ services:
       interval: 60s
       timeout: 5s
       retries: 5
-
-  pathmentordatasetcli:
-    image: ${DOCKER_REGISTRY-}pathmentor.dataset.cli
-    container_name: pathmentor.dataset.cli
-    build:
-      context: .
-      dockerfile: pathmentor_dataset_cli/Dockerfile

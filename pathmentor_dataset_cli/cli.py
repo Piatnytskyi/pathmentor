@@ -22,7 +22,7 @@ def build(
     result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Building dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Building dataset failed with "{ERRORS[error]}": {result}', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
@@ -38,7 +38,7 @@ def prepare(
     result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Preparing dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Preparing dataset failed with "{ERRORS[error]}": {result}', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
@@ -55,7 +55,7 @@ def normalize(
     result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Normalizing dataset failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Normalizing dataset failed with "{ERRORS[error]}" {result}', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(

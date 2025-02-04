@@ -8,6 +8,6 @@ class TrainModelCommandHandler():
         try:
             pathmentor_dataset_builder.train(request.output_path)
         except Exception as e:
-            return None, MODEL_TRAIN_ERROR
+            return e.strerror, MODEL_TRAIN_ERROR
         
         return SUCCESS, None

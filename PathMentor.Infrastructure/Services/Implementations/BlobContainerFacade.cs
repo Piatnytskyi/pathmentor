@@ -8,15 +8,24 @@ namespace PathMentor.Infrastructure.Services.Implementations
     {
         private readonly BlobContainerClient _blobContainerClient;
 
+        public string Name {
+            get => _blobContainerClient.Name;
+        }
+
+        public Uri Uri {
+            get => _blobContainerClient.Uri;
+        }   
+
         public BlobContainerFacade(BlobContainerClient blobContainerClient)
         {
             _blobContainerClient = blobContainerClient;
+            _blobContainerClient.CreateIfNotExists();
         }
 
-        public async Task<Uri> UploadBlobAsync(string blobName, Stream stream, string? storedPolicyName = null)
+        public async Task<Uri> UploadBlobAsync(string blobName, string filePath, bool overwrite = true, string? storedPolicyName = null)
         {
             BlobClient blobClient = _blobContainerClient.GetBlobClient(blobName);
-            await blobClient.UploadAsync(stream);
+            await blobClient.UploadAsync(filePath, overwrite);
 
             if (blobClient.CanGenerateSasUri)
             {

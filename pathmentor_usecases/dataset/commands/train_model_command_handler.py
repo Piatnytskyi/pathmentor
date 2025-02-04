@@ -8,7 +8,7 @@ class TrainModelCommandHandler():
         try:
             pathmentor_model_trainer.train(request.output_path)
         except Exception as e:
-            return None, DB_READ_ERROR
+            return e.strerror, DB_READ_ERROR
         
         return SUCCESS, None
 

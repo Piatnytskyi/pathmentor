@@ -9,10 +9,10 @@ class NormalizeDatasetCommandHandler():
         try:
             pathmentor_dataset_builder.normalize(request.prepared_dataset_path, request.connection_string, request.force)
         except FileNotFoundError as e:
-            return None, FILE_ERROR
+            return e.strerror, FILE_ERROR
         except psycopg.OperationalError as e:
-            return None, DB_READ_ERROR 
+            return e.strerror, DB_READ_ERROR 
         except psycopg.Error as e:
-            return None, DB_WRITE_ERROR
+            return e.strerror, DB_WRITE_ERROR
         
         return SUCCESS, None

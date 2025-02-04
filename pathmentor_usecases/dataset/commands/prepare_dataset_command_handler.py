@@ -8,8 +8,8 @@ class PrepareDatasetCommandHandler():
         try:
             prepared_dataset_path = pathmentor_dataset_builder.prepare(request.built_dataset_path, request.output_path)
         except FileNotFoundError as e:
-            return None, FILE_ERROR
+            return e.strerror, FILE_ERROR
         except PermissionError as e:
-            return None, DIR_ERROR
+            return e.strerror, DIR_ERROR
         
         return prepared_dataset_path, None

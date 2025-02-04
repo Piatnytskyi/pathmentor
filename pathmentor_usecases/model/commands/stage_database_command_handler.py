@@ -9,8 +9,8 @@ class StageDatabaseCommandHandler():
         try:
             pathmentor_dataset_stager.stage(request.connection_string)
         except psycopg.OperationalError as e:
-            return None, DB_READ_ERROR 
+            return e.strerror, DB_READ_ERROR 
         except psycopg.Error as e:
-            return None, DB_WRITE_ERROR
+            return e.strerror, DB_WRITE_ERROR
         
         return SUCCESS, None

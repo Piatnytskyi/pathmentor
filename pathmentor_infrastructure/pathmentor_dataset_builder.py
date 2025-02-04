@@ -1,6 +1,3 @@
-import os
-import zipfile
-from kaggle.api.kaggle_api_extended import KaggleApi
 from decimal import Decimal
 from pathlib import Path
 import numpy as np
@@ -13,20 +10,6 @@ from tqdm import tqdm
 class PathMentorDatasetBuilder:
     def build(self, output_path: Path) -> Path:
         output_folder = output_path.parent
-        
-        kaggle_api = KaggleApi()
-        kaggle_api.authenticate()
-        
-        kaggle_api.dataset_download_files('kaggle/kaggle-survey-2018', output_folder, unzip=True)
-        kaggle_api.competition_download_files('kaggle-survey-2020', output_folder)
-        with zipfile.ZipFile(output_folder / 'kaggle-survey-2020.zip', 'r') as zip_ref:
-            zip_ref.extractall(output_folder)
-        kaggle_api.competition_download_files('kaggle-survey-2021', output_folder)
-        with zipfile.ZipFile(output_folder / 'kaggle-survey-2021.zip', 'r') as zip_ref:
-            zip_ref.extractall(output_folder)
-        kaggle_api.competition_download_files('kaggle-survey-2022', output_folder)
-        with zipfile.ZipFile(output_folder / 'kaggle-survey-2022.zip', 'r') as zip_ref:
-            zip_ref.extractall(output_folder)
 
         df_2018 = pd.read_csv(output_folder / 'multipleChoiceResponses.csv', low_memory=False, header=[0,1])
         questions_2018 = pd.DataFrame(list(zip(df_2018.columns.get_level_values(0), df_2018.columns.get_level_values(1))))

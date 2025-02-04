@@ -21,7 +21,7 @@ def stage(
     result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Staging database failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Staging database failed with "{ERRORS[error]}": {result}', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
@@ -37,7 +37,7 @@ def train(
     result, error = mediator.send(request)
     if error:
         typer.secho(
-            f'Training model failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+            f'Training model failed with "{ERRORS[error]}": {result}', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
