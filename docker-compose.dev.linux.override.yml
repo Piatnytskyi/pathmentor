@@ -1,3 +1,5 @@
+# POSTGRES_USER=root POSTGRES_PASSWORD=test CERTIFICATE_PASSWORD=Pa$$w0rd docker compose -f docker-compose.yml -f docker-compose.dev.linux.override.yml up -d --build
+
 version: '3.4'
 
 services:
@@ -40,10 +42,17 @@ services:
         condition: service_healthy
 
   pathmentordatasetcli:
+    image: ${DOCKER_REGISTRY-}pathmentor.dataset.cli
+    container_name: pathmentor.dataset.cli
+    build:
+      context: .
+      dockerfile: pathmentor_dataset_cli/Dockerfile
     environment:
       - ConnectionStrings__DefaultConnection=host=pathmentor.model.database port=5432 dbname=pathmentormodel user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}
     volumes:
       - $HOME/.kaggle:/root/.kaggle/:ro
     depends_on:
       pathmentormodeldatabase:
+        condition: service_healthy
+      pathmentormodelapi:
         condition: service_healthy

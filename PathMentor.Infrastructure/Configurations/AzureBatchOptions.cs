@@ -6,7 +6,6 @@ namespace PathMentor.Infrastructure.Configurations
     {
         public required string BaseUrl { get; set; }
         public required string AccountName { get; set; }
-        public required string KeyValue { get; set; }
-        public required CloudPool CloudPool { get; set; }
+        public required string AccountKey { get; set; }
     }
 }

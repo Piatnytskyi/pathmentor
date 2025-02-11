@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PathMentor.Infrastructure.Services.Implementations
 {
-    public class PathMentorModelDatabaseSeeder
+    public static class PathMentorModelDatabaseSeeder
     {
         public static async Task EnsurePopulated(
             PathMentorModelDbContext context)
@@ -17,6 +17,8 @@ namespace PathMentor.Infrastructure.Services.Implementations
             {
                 return;
             }
+
+            
         }
     }
 }

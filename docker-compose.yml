@@ -1,4 +1,4 @@
-# docker compose -f docker-compose.yml -f docker-compose.*.override.yml --env-file *.env up -d
+# docker compose -f docker-compose.yml -f docker-compose.*.override.yml --env-file *.env up -d --build
 
 version: '3.4'
 
@@ -9,18 +9,8 @@ services:
     build:
       context: .
       dockerfile: PathMentor.Model.API/Dockerfile
-    depends_on:
-      pathmentordatasetcli:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "curl -k --fail https://localhost/health || exit"]
       interval: 60s
       timeout: 5s
       retries: 5
-
-  pathmentordatasetcli:
-    image: ${DOCKER_REGISTRY-}pathmentor.dataset.cli
-    container_name: pathmentor.dataset.cli
-    build:
-      context: .
-      dockerfile: pathmentor_dataset_cli/Dockerfile
