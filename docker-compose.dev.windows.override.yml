@@ -1,4 +1,4 @@
-# POSTGRES_USER=root POSTGRES_PASSWORD=test docker compose -f docker-compose.yml -f docker-compose.dev.linux.override.yml up -d --build
+# $env:POSTGRES_USER='root'; $env:POSTGRES_PASSWORD='test'; docker compose -f docker-compose.yml -f docker-compose.dev.windows.override.yml up -d --build
 
 services:
   pathmentormodeldatabase:
@@ -24,6 +24,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=80
       - ASPNETCORE_HTTPS_PORTS=443
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/localhost.pfx
       - ConnectionStrings__DefaultConnection=Host=pathmentor.model.database; Port=5432; Database=pathmentormodel; Username=${POSTGRES_USER}; Password=${POSTGRES_PASSWORD}; CommandTimeout=120;
     build:
       args:
@@ -32,9 +33,8 @@ services:
       - "5000:80"
       - "5001:443"
     volumes:
-      - $HOME/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
-      - $HOME/.aspnet/https:/root/.aspnet/https:ro
-      - $HOME/.vsdbg:/remote_debugger:rw
+      - ${APPDATA}\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${USERPROFILE}\.aspnet\https\:/root/.aspnet/https:ro
     depends_on:
       pathmentormodeldatabase:
         condition: service_healthy
@@ -48,7 +48,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=host=pathmentor.model.database port=5432 dbname=pathmentormodel user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}
     volumes:
-      - $HOME/.kaggle:/root/.kaggle/:ro
+      - ${USERPROFILE}\.kaggle:/root/.kaggle/:ro
     depends_on:
       pathmentormodeldatabase:
         condition: service_healthy
