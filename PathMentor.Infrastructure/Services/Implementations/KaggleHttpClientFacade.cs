@@ -38,20 +38,29 @@ namespace PathMentor.Infrastructure.Services.Implementations
             CompetitionsListResponse? competitionsList = await _httpClient.GetFromJsonAsync<CompetitionsListResponse>(_baseApiUrl + "competitions/data/list/" + competitionName);
             if (competitionsList == null)
                 return;
+                    
+            IEnumerable<Task> downloadTasks = competitionsList.Files
+                .Select(async file =>
+                {
+                    string relativePath = file.Name;
+                    if (file.Name.EndsWith(".csv"))
+                        relativePath += ".zip";
 
-            IEnumerable<Task> downloadTasks = competitionsList.Files.Select(async file =>
-            {
-                string filePath = Path.Combine(targetDirectory, file.Name + ".zip");
-                string? fileDirectory = Path.GetDirectoryName(filePath);
-                if (fileDirectory != null)
-                    Directory.CreateDirectory(fileDirectory);
-                using (Stream responseStream = await _httpClient.GetStreamAsync(
-                    _baseApiUrl + "competitions/data/download/" + competitionName + "/" + Uri.EscapeDataString(file.Name)))
-                using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    await responseStream.CopyToAsync(fileStream);
+                    string filePath = Path.Combine(targetDirectory, relativePath);
+                    string? fileDirectory = Path.GetDirectoryName(filePath);
+                    if (fileDirectory != null)
+                        Directory.CreateDirectory(fileDirectory);
+                        
+                    using (Stream responseStream = await _httpClient.GetStreamAsync(
+                        _baseApiUrl + "competitions/data/download/" + competitionName + "/" + Uri.EscapeDataString(file.Name)))
+                    using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        await responseStream.CopyToAsync(fileStream);
 
-                ZipFile.ExtractToDirectory(filePath, targetDirectory, true);
-            });
+                    if (filePath.EndsWith(".zip"))
+                        ZipFile.ExtractToDirectory(filePath, fileDirectory ?? targetDirectory, true);
+
+                    return file;
+                });
 
             await Task.WhenAll(downloadTasks);
         }

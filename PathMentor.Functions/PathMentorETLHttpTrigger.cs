@@ -1,4 +1,6 @@
 using System.Net;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Batch;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PathMentor.Infrastructure.Configurations;
 using PathMentor.Infrastructure.Services.Abstractions;
+using PathMentor.Infrastructure.Services.Implementations;
 
 namespace PathMentor.Functions
 {
@@ -17,50 +20,51 @@ namespace PathMentor.Functions
     {
         private readonly ILogger<PathMentorETLHttpTrigger> _logger;
         private readonly IKaggleHttpClientFacade _kaggleHttpClientFacade;
-        private readonly IBlobContainerFacade _blobContainerFacade;
         private readonly IConfiguration _configuration;
         private readonly IOptions<AzureBatchOptions> _azureBatchOptions;
 
         public PathMentorETLHttpTrigger(
             ILogger<PathMentorETLHttpTrigger> logger,
             IKaggleHttpClientFacade kaggleHttpClientFacade,
-            IBlobContainerFacade blobContainerFacade,
             IConfiguration configuration,
             IOptions<AzureBatchOptions> azureBatchOptions)
         {
             _logger = logger;
             _kaggleHttpClientFacade = kaggleHttpClientFacade;
-            _blobContainerFacade = blobContainerFacade;
             _configuration = configuration;
             _azureBatchOptions = azureBatchOptions;
         }
 
-        [Function("PathMentorETLHttpTrigger")]
+        [Function(nameof(PathMentorETLHttpTrigger))]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
         {
             await Task.WhenAll(
                 _kaggleHttpClientFacade.DownloadDatasetFilesAsync("kaggle/kaggle-survey-2018", "./datasets", true),
                 _kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2020", "./datasets"),
                 _kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2021", "./datasets"),
-                _kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2022", "./datasets")
-            );
+                _kaggleHttpClientFacade.DownloadCompetitionFilesAsync("kaggle-survey-2022", "./datasets"));
 
-            await _blobContainerFacade.UploadBlobAsync(
-                "multipleChoiceResponses.csv",
-                "./datasets/multipleChoiceResponses.csv",
-                true);
-            await _blobContainerFacade.UploadBlobAsync(
-                "kaggle_survey_2020_responses.csv",
-                "./datasets/kaggle_survey_2020_responses.csv",
-                true);
-            await _blobContainerFacade.UploadBlobAsync(
-                "kaggle_survey_2021_responses.csv",
-                "./datasets/kaggle_survey_2021_responses.csv",
-                true);
-            await _blobContainerFacade.UploadBlobAsync(
-                "kaggle_survey_2022_responses.csv",
-                "./datasets/kaggle_survey_2022_responses.csv",
-                true);
+            BlobContainerFacade blobContainerFacade = new BlobContainerFacade(
+                new BlobContainerClient(
+                    _configuration["AzureStorage:ConnectionString"],
+                    _configuration[nameof(PathMentorETLHttpTrigger) + ":AzureStorage:BlobContainerName"]));
+            await Task.WhenAll(
+                blobContainerFacade.UploadBlobAsync(
+                    "multipleChoiceResponses.csv",
+                    "./datasets/multipleChoiceResponses.csv",
+                    true),
+                blobContainerFacade.UploadBlobAsync(
+                    "kaggle_survey_2020_responses.csv",
+                    "./datasets/kaggle_survey_2020_responses.csv",
+                    true),
+                blobContainerFacade.UploadBlobAsync(
+                    "kaggle_survey_2021_responses.csv",
+                    "./datasets/kaggle_survey_2021_responses.csv",
+                    true),
+                blobContainerFacade.UploadBlobAsync(
+                    "kaggle_survey_2022_responses.csv",
+                    "./datasets/kaggle_survey_2022_responses.csv",
+                    true));
 
             BatchSharedKeyCredentials batchSharedKeyCredentials = new BatchSharedKeyCredentials(
                 _azureBatchOptions.Value.BaseUrl,
@@ -70,16 +74,14 @@ namespace PathMentor.Functions
             {
                 string packagesInstallCommand = "/bin/bash -c \"sudo apt-get -y update && sudo dpkg --configure -a" +
                     " && sudo apt-get install -y python3-pip && pip3 install --upgrade pip" +
-                    " && cd $AZ_BATCH_APP_PACKAGE_pathmentor_dataset_cli" +
+                    " && cd $AZ_BATCH_APP_PACKAGE_" + _configuration[nameof(PathMentorETLHttpTrigger) + ":AzureBatchOptions:ApplicationId"] +
                     " && pip3 install -r pathmentor_dataset_cli/requirements.txt";
                 UserIdentity defaultUserIdentity = new UserIdentity(new AutoUserSpecification(AutoUserScope.Task, ElevationLevel.Admin));
                 List<ApplicationPackageReference> applicationPackageReferences = new List<ApplicationPackageReference>
                 {
-                    new ApplicationPackageReference
-                    {
-                        ApplicationId = "pathmentor_dataset_cli"
-                    }
+                    new ApplicationPackageReference { ApplicationId = _configuration[nameof(PathMentorETLHttpTrigger) + ":AzureBatchOptions:ApplicationId"] }
                 };
+                Uri taskOutputContainerSasUri = blobContainerFacade.GenerateSasUri(BlobContainerSasPermissions.Write);
                 List<CloudTask> tasks = new List<CloudTask>
                 {
                     new CloudTask(
@@ -90,16 +92,16 @@ namespace PathMentor.Functions
                         ResourceFiles = new List<ResourceFile>
                         {
                             ResourceFile.FromAutoStorageContainer(
-                                _blobContainerFacade.Name,
+                                blobContainerFacade.Name,
                                 blobPrefix: "multipleChoiceResponses.csv"),
                             ResourceFile.FromAutoStorageContainer(
-                                _blobContainerFacade.Name,
+                                blobContainerFacade.Name,
                                 blobPrefix: "kaggle_survey_2020_responses.csv"),
                             ResourceFile.FromAutoStorageContainer(
-                                _blobContainerFacade.Name,
+                                blobContainerFacade.Name,
                                 blobPrefix: "kaggle_survey_2021_responses.csv"),
                             ResourceFile.FromAutoStorageContainer(
-                                _blobContainerFacade.Name,
+                                blobContainerFacade.Name,
                                 blobPrefix: "kaggle_survey_2022_responses.csv")
                         },
                         UserIdentity = defaultUserIdentity,
@@ -110,8 +112,7 @@ namespace PathMentor.Functions
                                 "built_database.csv",
                                 new OutputFileDestination(
                                     new OutputFileBlobContainerDestination(
-                                        _blobContainerFacade.Uri.ToString(),
-                                        new ComputeNodeIdentityReference(),
+                                        taskOutputContainerSasUri.ToString(),
                                         "built_database.csv")),
                                 new OutputFileUploadOptions(OutputFileUploadCondition.TaskSuccess))
                         }
@@ -127,17 +128,17 @@ namespace PathMentor.Functions
                         ResourceFiles = new List<ResourceFile>
                         {
                             ResourceFile.FromAutoStorageContainer(
-                                _blobContainerFacade.Name,
+                                blobContainerFacade.Name,
                                 blobPrefix: "built_database.csv")
                         },
                         OutputFiles = new List<OutputFile>
                         {
                             new OutputFile(
                                 "prepared_database.csv",
-                                new OutputFileDestination(new OutputFileBlobContainerDestination(
-                                    _blobContainerFacade.Uri.ToString(),
-                                    new ComputeNodeIdentityReference(),
-                                    "prepared_database.csv")),
+                                new OutputFileDestination(
+                                    new OutputFileBlobContainerDestination(
+                                        taskOutputContainerSasUri.ToString(),
+                                        "prepared_database.csv")),
                                 new OutputFileUploadOptions(OutputFileUploadCondition.TaskSuccess))
                         }
                     },
@@ -156,7 +157,7 @@ namespace PathMentor.Functions
                         ResourceFiles = new List<ResourceFile>
                         {
                             ResourceFile.FromAutoStorageContainer(
-                                _blobContainerFacade.Name,
+                                blobContainerFacade.Name,
                                 blobPrefix: "prepared_database.csv")
                         },
                     }
@@ -166,8 +167,12 @@ namespace PathMentor.Functions
                 {
                     try
                     {                    
-                        await batchClient.JobOperations.GetTaskAsync("pathmentor_dataset", task.Id);
-                        await batchClient.JobOperations.DeleteTaskAsync("pathmentor_dataset", task.Id);
+                        await batchClient.JobOperations.GetTaskAsync(
+                            _configuration[nameof(PathMentorETLHttpTrigger) + ":AzureBatchOptions:JobId"],
+                            task.Id);
+                        await batchClient.JobOperations.DeleteTaskAsync(
+                            _configuration[nameof(PathMentorETLHttpTrigger) + ":AzureBatchOptions:JobId"],
+                            task.Id);
                     }
                     catch (BatchException ex) when (ex.RequestInformation.HttpStatusCode == HttpStatusCode.NotFound)
                     {
@@ -175,7 +180,9 @@ namespace PathMentor.Functions
                     }
                 }
 
-                await batchClient.JobOperations.AddTaskAsync("pathmentor_dataset", tasks);
+                await batchClient.JobOperations.AddTaskAsync(
+                    _configuration[nameof(PathMentorETLHttpTrigger) + ":AzureBatchOptions:JobId"],
+                    tasks);
             }
             return new OkResult();
         }

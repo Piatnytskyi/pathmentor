@@ -22,6 +22,23 @@ namespace PathMentor.Infrastructure.Services.Implementations
             _blobContainerClient.CreateIfNotExists();
         }
 
+        public Uri GenerateSasUri(BlobContainerSasPermissions permissions, DateTimeOffset expiresOn = default)
+        {
+            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            {
+                BlobContainerName = _blobContainerClient.Name,
+                Resource = "c"
+            };
+
+            if (expiresOn == default)
+                expiresOn = DateTimeOffset.UtcNow.AddHours(1);
+                
+            sasBuilder.ExpiresOn = expiresOn;
+            sasBuilder.SetPermissions(permissions);
+
+            return _blobContainerClient.GenerateSasUri(sasBuilder);
+        }
+
         public async Task<Uri> UploadBlobAsync(string blobName, string filePath, bool overwrite = true, string? storedPolicyName = null)
         {
             BlobClient blobClient = _blobContainerClient.GetBlobClient(blobName);
