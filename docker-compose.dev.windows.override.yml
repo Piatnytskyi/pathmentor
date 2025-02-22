@@ -19,6 +19,20 @@ services:
     ports:
       - "5432:5432"
 
+  pathmentordatasetcli:
+    image: ${DOCKER_REGISTRY-}pathmentor.dataset.cli
+    container_name: pathmentor.dataset.cli
+    build:
+      context: .
+      dockerfile: pathmentor_dataset_cli/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=host=pathmentor.model.database port=5432 dbname=pathmentormodel user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}
+    volumes:
+      - ${USERPROFILE}\.kaggle:/root/.kaggle/:ro
+    depends_on:
+      pathmentormodeldatabase:
+        condition: service_healthy
+
   pathmentormodelapi:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -38,19 +52,5 @@ services:
     depends_on:
       pathmentormodeldatabase:
         condition: service_healthy
-
-  pathmentordatasetcli:
-    image: ${DOCKER_REGISTRY-}pathmentor.dataset.cli
-    container_name: pathmentor.dataset.cli
-    build:
-      context: .
-      dockerfile: pathmentor_dataset_cli/Dockerfile
-    environment:
-      - ConnectionStrings__DefaultConnection=host=pathmentor.model.database port=5432 dbname=pathmentormodel user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}
-    volumes:
-      - ${USERPROFILE}\.kaggle:/root/.kaggle/:ro
-    depends_on:
-      pathmentormodeldatabase:
-        condition: service_healthy
-      pathmentormodelapi:
-        condition: service_healthy
+      pathmentordatasetcli:
+        condition: service_completed_successfully
