@@ -52,7 +52,8 @@ using (var scope = app.Services.CreateScope())
 {
     await PathMentorModelDatabaseSeeder.EnsurePopulated(
         scope.ServiceProvider.GetRequiredService<PathMentorModelDbContext>(),
-        app.Configuration);
+        app.Configuration,
+        app.Logger);
 }
 
 app.Run();

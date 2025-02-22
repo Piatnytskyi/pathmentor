@@ -1,6 +1,7 @@
 using PathMentor.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace PathMentor.Infrastructure.Services.Implementations
 {
@@ -8,7 +9,8 @@ namespace PathMentor.Infrastructure.Services.Implementations
     {
         public static async Task EnsurePopulated(
             PathMentorModelDbContext context,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger logger)
         {
             if (context.Database.GetPendingMigrations().Any())
                 context.Database.Migrate();
@@ -18,7 +20,16 @@ namespace PathMentor.Infrastructure.Services.Implementations
            
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(configuration["AzureFunctions:PathmentorETLHttpTriggerUrl"]!);
-            (await client.PostAsync("", new StringContent(""))).EnsureSuccessStatusCode();
+
+            try
+            {
+                (await client.PostAsync("", new StringContent(""))).EnsureSuccessStatusCode();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error launching ETL function!");
+                return;
+            }
         }
     }
 }
