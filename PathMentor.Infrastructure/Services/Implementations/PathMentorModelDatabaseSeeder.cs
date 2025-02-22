@@ -18,7 +18,7 @@ namespace PathMentor.Infrastructure.Services.Implementations
            
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(configuration["AzureFunctions:PathmentorETLHttpTriggerUrl"]!);
-            await client.PostAsync("", new StringContent(""));
+            (await client.PostAsync("", new StringContent(""))).EnsureSuccessStatusCode();
         }
     }
 }

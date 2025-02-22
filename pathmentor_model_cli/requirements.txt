@@ -1,26 +1,64 @@
-bleach==6.2.0
-certifi==2024.8.30
-charset-normalizer==3.4.0
-click==8.1.7
-idna==3.10
+absl-py @ file:///home/conda/feedstock_root/build_artifacts/absl-py_1733730548347/work
+astunparse @ file:///home/conda/feedstock_root/build_artifacts/astunparse_1736248061654/work
+bleach==6.1.0
+Brotli @ file:///home/conda/feedstock_root/build_artifacts/brotli-split_1725267488082/work
+cached-property @ file:///home/conda/feedstock_root/build_artifacts/cached_property_1615209429212/work
+certifi==2023.7.22
+charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1735929714516/work
+click==8.1.8
+clr==1.0.3
+flatbuffers @ file:///home/conda/feedstock_root/build_artifacts/python-flatbuffers_1739279199749/work
+gast @ file:///home/conda/feedstock_root/build_artifacts/gast_1733299680490/work
+google-pasta @ file:///home/conda/feedstock_root/build_artifacts/google-pasta_1733852499742/work
+grpcio @ file:///home/conda/feedstock_root/build_artifacts/grpc-split_1735582753555/work
+h5py @ file:///home/conda/feedstock_root/build_artifacts/h5py_1739952267264/work
+idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1733211830134/work
+importlib_metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1737420181517/work
+joblib==1.3.2
+kaggle==1.5.16
+keras @ file:///home/conda/feedstock_root/build_artifacts/keras_1736538740036/work
+Markdown @ file:///home/conda/feedstock_root/build_artifacts/markdown_1710435156458/work
 markdown-it-py==3.0.0
+MarkupSafe @ file:///home/conda/feedstock_root/build_artifacts/markupsafe_1733219680183/work
 mdurl==0.1.2
 mediatr==1.3.2
-psycopg==3.2.3
-psycopg-binary==3.2.3
-psycopg-pool==3.2.4
+ml-dtypes @ file:///home/conda/feedstock_root/build_artifacts/ml_dtypes_1725475049998/work
+namex @ file:///home/conda/feedstock_root/build_artifacts/namex_1733858070416/work
+numpy==1.26.2
+opt_einsum @ file:///home/conda/feedstock_root/build_artifacts/opt_einsum_1733687912731/work
+optree @ file:///home/conda/feedstock_root/build_artifacts/optree_1737742742611/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1733203243479/work
+pandas==2.1.3
+protobuf @ file:///home/conda/feedstock_root/build_artifacts/protobuf_1731365424504/work/bazel-bin/python/dist/protobuf-5.28.3-cp312-abi3-linux_x86_64.whl#sha256=9355073b220aa50e90e39cff81821efdd518fc0f0f63bf1d8f7dc685e4bbcf67
+psycopg==3.2.4
 Pygments==2.18.0
+PySocks @ file:///home/conda/feedstock_root/build_artifacts/pysocks_1733217236728/work
 python-dateutil==2.9.0.post0
-python-slugify==8.0.4
-pytz==2024.2
-requests==2.32.3
-rich==13.9.4
-shellingham==1.5.4
-six==1.17.0
+python-slugify==8.0.1
+pytz==2023.3.post1
+requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1733217035951/work
+rich==13.8.1
+scikit-learn==1.3.2
+scipy==1.11.4
+setuptools==75.8.0
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1733380938961/work
+tensorboard @ file:///home/conda/feedstock_root/build_artifacts/tensorboard_1733820672324/work/tensorboard-2.18.0-py3-none-any.whl#sha256=107ca4821745f73e2aefa02c50ff70a9b694f39f790b11e6f682f7d326745eab
+tensorboard_data_server @ file:///home/conda/feedstock_root/build_artifacts/tensorboard-data-server_1728639726553/work/tensorboard_data_server-0.7.0-py3-none-manylinux2014_x86_64.whl#sha256=40d8fffc5c59ade011656e89f9bc9c90185efcd63ddc58bd4487293c02efb1ed
+tensorflow @ file:///home/conda/feedstock_root/build_artifacts/tensorflow-split_1739109792230/work/tensorflow_pkg/tensorflow-2.18.0-cp312-cp312-linux_x86_64.whl#sha256=8935842def951d06a04a6da276d7d85013d26ff17c5f7e587bbc77f5c50c710e
+tensorflow-io==0.37.1
+tensorflow-io-gcs-filesystem==0.37.1
+tensorflow-recommenders==0.7.3
+tensorflow_estimator @ file:///home/conda/feedstock_root/build_artifacts/tensorflow-split_1739109792230/work/tensorflow-estimator/wheel_dir/tensorflow_estimator-2.15.0-py2.py3-none-any.whl#sha256=bbde087b5fcd8b8a7f6c53803af74e950c33b79f94e2269aa57d75d4c2fe5bcf
+termcolor @ file:///home/conda/feedstock_root/build_artifacts/termcolor_1733754631889/work
 text-unidecode==1.3
+threadpoolctl==3.2.0
 tqdm==4.67.1
-typer==0.15.1
+typer==0.12.5
 typing_extensions==4.12.2
-tzdata==2024.2
-urllib3==2.2.3
+tzdata==2023.3
+urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1718653059220/work
 webencodings==0.5.1
+Werkzeug @ file:///home/conda/feedstock_root/build_artifacts/werkzeug_1733160440960/work
+wheel==0.45.1
+wrapt @ file:///home/conda/feedstock_root/build_artifacts/wrapt_1736869451908/work
+zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1732827521216/work
