@@ -11,8 +11,8 @@ class NormalizeDatasetCommandHandler():
         except FileNotFoundError as e:
             return e.strerror, FILE_ERROR
         except psycopg.OperationalError as e:
-            return e.strerror, DB_READ_ERROR 
+            return e, DB_READ_ERROR 
         except psycopg.Error as e:
-            return e.strerror, DB_WRITE_ERROR
+            return e, DB_WRITE_ERROR
         
         return SUCCESS, None

@@ -16,6 +16,18 @@
             "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
         },
         {
+            "name": "Python Debugger: pathmentor_dataset_cli prepare",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pathmentor_dataset_cli",
+            "args": [
+                "prepare",
+                "pathmentor_dataset_cli/bin/built_database.csv",
+                "pathmentor_dataset_cli/bin/prepared_database.csv"
+            ],
+            "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
+        },
+        {
             "name": "Python Debugger: pathmentor_dataset_cli normalize",
             "type": "debugpy",
             "request": "launch",

@@ -491,9 +491,11 @@ class PathMentorDatasetBuilder:
                     cursor.execute("TRUNCATE TABLE \"Titles\" CASCADE;")
                     cursor.execute("TRUNCATE TABLE \"Experiences\" CASCADE;")
                     cursor.execute("TRUNCATE TABLE \"Salaries\" CASCADE;")
-                    cursor.execute("TRUNCATE TABLE \"Interactions\" CASCADE;")
-                    cursor.execute("TRUNCATE TABLE \"InteractionSkill\" CASCADE;")
-                    connection.commit()
+                
+                cursor.execute("TRUNCATE TABLE \"Interactions\" CASCADE;")
+                cursor.execute("TRUNCATE TABLE \"InteractionSkill\" CASCADE;")
+
+                connection.commit()
 
                 unique_skills_ids = {}
                 for skill in tqdm(unique_skills, desc="Inserting skills"):
@@ -533,29 +535,18 @@ class PathMentorDatasetBuilder:
 
                     label_skill_id = unique_skills_ids[interaction['label_skill']]
 
-                    cursor.execute("""
-                        SELECT \"Id\" FROM \"Interactions\" WHERE \"TitleId\" = %s AND \"ExperienceId\" = %s AND \"SalaryId\" = %s AND \"LabelSkillId\" = %s;
-                        """, (title_id, experience_id, salary_id, label_skill_id))
-                    interaction_id = cursor.fetchone()
-                    if interaction_id is None:
-                        interaction_id = cursor.execute("""
-                            INSERT INTO \"Interactions\" (
-                                \"Id\", \"TitleId\", \"ExperienceId\", \"SalaryId\", \"LabelSkillId\", \"Created\"
-                            ) VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW() AT TIME ZONE 'UTC') RETURNING \"Id\";
-                            """, (title_id, experience_id, salary_id, label_skill_id)).fetchone()[0]
-                    else:
-                        interaction_id = interaction_id[0]
-                    
+                    interaction_id = cursor.execute("""
+                        INSERT INTO \"Interactions\" (
+                            \"Id\", \"TitleId\", \"ExperienceId\", \"SalaryId\", \"LabelSkillId\", \"Created\"
+                        ) VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW() AT TIME ZONE 'UTC') RETURNING \"Id\";
+                        """, (title_id, experience_id, salary_id, label_skill_id)).fetchone()[0]
+
                     context_skill_ids = [unique_skills_ids[skill] for skill in interaction['context_skill']]
                     for context_skill_id in context_skill_ids:
                         cursor.execute("""
-                            SELECT 1 FROM \"InteractionSkill\" WHERE \"ContextInteractionsId\" = %s AND \"ContextSkillsId\" = %s;
+                            INSERT INTO \"InteractionSkill\" (\"ContextInteractionsId\", \"ContextSkillsId\") VALUES (%s, %s);
                             """, (interaction_id, context_skill_id))
-                        if cursor.fetchone() is None:
-                            cursor.execute("""
-                                INSERT INTO \"InteractionSkill\" (\"ContextInteractionsId\", \"ContextSkillsId\") VALUES (%s, %s);
-                                """, (interaction_id, context_skill_id))
-                            
+                    
                     connection.commit()
 
         print("Interactions and skills have been successfully inserted.")
