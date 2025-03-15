@@ -1,6 +1,7 @@
 import pandas as pd
 import psycopg
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
 class PathMentorDatabaseStager:
     def stage(self, connection_string: str) -> None:
@@ -10,84 +11,88 @@ class PathMentorDatabaseStager:
                     CREATE SCHEMA IF NOT EXISTS staging
                 """)
 
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS staging.Titles (
-                        Id UUID PRIMARY KEY,
-                        Name VARCHAR(100),
-                        CONSTRAINT "PK_Titles" PRIMARY KEY ("Id")
-                    )
-                """)
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS staging.Experiences (
-                        Id UUID PRIMARY KEY,
-                        Range VARCHAR(100),
-                        CONSTRAINT "PK_Experiences" PRIMARY KEY ("Id")
-                    )
-                """)
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS staging.Salaries (
-                        Id UUID PRIMARY KEY,
-                        Range VARCHAR(100),
-                        CONSTRAINT "PK_Salaries" PRIMARY KEY ("Id")
-                    )
-                """)
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS staging.Skills (
-                        Id UUID PRIMARY KEY,
-                        Name VARCHAR(100),
-                        CONSTRAINT "PK_Skills" PRIMARY KEY ("Id")    
-                    )
-                """)
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS staging.InteractionSkill (
-                        ContextInteractionsId UUID,
-                        ContextSkillsId UUID,
-                        PRIMARY KEY (ContextInteractionsId, ContextSkillsId)
-                        CONSTRAINT "PK_InteractionSkill" PRIMARY KEY ("ContextInteractionsId", "ContextSkillsId"),
-                        CONSTRAINT "FK_InteractionSkill_Interactions_ContextInteractionsId" FOREIGN KEY ("ContextInteractionsId") REFERENCES "Interactions" ("Id") ON DELETE CASCADE,
-                        CONSTRAINT "FK_InteractionSkill_Skills_ContextSkillsId" FOREIGN KEY ("ContextSkillsId") REFERENCES "Skills" ("Id") ON DELETE CASCADE
-                    )
-                """)
-
-                for table in ['staging.train_interactions', 'staging.test_interactions']:
+                for table in ['train_interactions', 'test_interactions']:
                     cursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS {table} (
-                            "Id" uuid NOT NULL,
+                        DROP TABLE IF EXISTS staging.{table} CASCADE
+                    """)
+                    cursor.execute(f"""
+                        DROP TABLE IF EXISTS staging.{table}Skill CASCADE
+                    """)
+
+                connection.commit()
+
+                for table in ['train_interactions', 'test_interactions']:
+                    cursor.execute(f"""
+                        CREATE TABLE IF NOT EXISTS staging.{table} (
+                            "Id" uuid PRIMARY KEY,
                             "TitleId" uuid NOT NULL,
                             "ExperienceId" uuid NOT NULL,
                             "SalaryId" uuid NOT NULL,
                             "LabelSkillId" uuid NOT NULL,
                             "Created" timestamp with time zone NOT NULL,
-                            CONSTRAINT "PK_Interactions" PRIMARY KEY ("Id"),
-                            CONSTRAINT "FK_Interactions_Experiences_ExperienceId" FOREIGN KEY ("ExperienceId") REFERENCES "Experiences" ("Id") ON DELETE CASCADE,
-                            CONSTRAINT "FK_Interactions_Salaries_SalaryId" FOREIGN KEY ("SalaryId") REFERENCES "Salaries" ("Id") ON DELETE CASCADE,
-                            CONSTRAINT "FK_Interactions_Skills_LabelSkillId" FOREIGN KEY ("LabelSkillId") REFERENCES "Skills" ("Id") ON DELETE CASCADE,
-                            CONSTRAINT "FK_Interactions_Titles_TitleId" FOREIGN KEY ("TitleId") REFERENCES "Titles" ("Id") ON DELETE CASCADE
+                            CONSTRAINT "FK_{table}_Experiences_ExperienceId" FOREIGN KEY ("ExperienceId") REFERENCES "Experiences" ("Id") ON DELETE CASCADE,
+                            CONSTRAINT "FK_{table}_Salaries_SalaryId" FOREIGN KEY ("SalaryId") REFERENCES "Salaries" ("Id") ON DELETE CASCADE,
+                            CONSTRAINT "FK_{table}_Skills_LabelSkillId" FOREIGN KEY ("LabelSkillId") REFERENCES "Skills" ("Id") ON DELETE CASCADE,
+                            CONSTRAINT "FK_{table}_Titles_TitleId" FOREIGN KEY ("TitleId") REFERENCES "Titles" ("Id") ON DELETE CASCADE
                         )
                     """)
+
+                    cursor.execute(f"""
+                        CREATE TABLE IF NOT EXISTS staging.{table}Skill (
+                            "ContextInteractionsId" UUID,
+                            "ContextSkillsId" UUID,
+                            PRIMARY KEY ("ContextInteractionsId", "ContextSkillsId"),
+                            CONSTRAINT "FK_{table}Skill_{table}_ContextInteractionsId" FOREIGN KEY ("ContextInteractionsId") REFERENCES staging.{table} ("Id") ON DELETE CASCADE,
+                            CONSTRAINT "FK_{table}Skill_Skills_ContextSkillsId" FOREIGN KEY ("ContextSkillsId") REFERENCES "Skills" ("Id") ON DELETE CASCADE
+                        )
+                    """)
+
                 connection.commit()
 
-                train_latest_entry = cursor.execute("SELECT MAX(Created) FROM staging.train_interactions").fetchone()
-                test_latest_entry = cursor.execute("SELECT MAX(Created) FROM staging.test_interactions").fetchone()
+                cursor.execute("""
+                    SELECT "Id", "Name" FROM "Titles"
+                """)
+                titles_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+
+                cursor.execute("""
+                    SELECT "Id", "Range" FROM "Experiences"
+                """)
+                experiences_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+
+                cursor.execute("""
+                    SELECT "Id", "Range" FROM "Salaries"
+                """)
+                salaries_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+
+                cursor.execute("""
+                    SELECT "Id", "Name" FROM "Skills"
+                """)
+                skills_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+
+                train_latest_entry = cursor.execute("""SELECT MAX("Created") FROM staging.train_interactions""").fetchone()
+                test_latest_entry = cursor.execute("""SELECT MAX("Created") FROM staging.test_interactions""").fetchone()
 
                 latest_created = max(train_latest_entry[0], test_latest_entry[0]) if train_latest_entry[0] and test_latest_entry[0] else None
 
                 print("Latest latest created in stage:", latest_created)
 
                 select_interactions_query = """
-                    SELECT i.*, 
-                        t.Name as context_user_title, 
-                        e.Range as context_user_experience, 
-                        s.Range as context_user_salary, 
-                        sk.Name as label_skill
-                    FROM Interactions i
-                    JOIN Titles t ON i.TitleId = t.Id
-                    JOIN Experiences e ON i.ExperienceId = e.Id
-                    JOIN Salaries s ON i.SalaryId = s.Id
-                    JOIN Skills sk ON i.LabelSkillId = sk.Id
+                    SELECT t."Name" as context_user_title, 
+                        e."Range" as context_user_experience, 
+                        s."Range" as context_user_salary,
+                        sk."Name" as label_skill,
+                        array_agg(cs."Name") as context_skills
+                    FROM "Interactions" i
+                    JOIN "Titles" t ON i."TitleId" = t."Id"
+                    JOIN "Experiences" e ON i."ExperienceId" = e."Id"
+                    JOIN "Salaries" s ON i."SalaryId" = s."Id"
+                    JOIN "Skills" sk ON i."LabelSkillId" = sk."Id"
+                    LEFT JOIN "InteractionSkill" ints ON i."Id" = ints."ContextInteractionsId"
+                    LEFT JOIN "Skills" cs ON ints."ContextSkillsId" = cs."Id"
+                    GROUP BY i."Id", t."Id", e."Id", s."Id", sk."Id"
                 """
                 if latest_created is not None:
-                    select_interactions_query += " WHERE i.Created > %s"
+                    select_interactions_query += """ WHERE i."Created" > %s"""
                     cursor.execute(select_interactions_query, (latest_created,))
                 else:
                     cursor.execute(select_interactions_query)
@@ -120,47 +125,28 @@ class PathMentorDatabaseStager:
                 print("Interactions test split:")
                 print(test_df.head())
 
-                cursor.execute("""
-                    INSERT INTO staging.Titles (Id, Name)
-                    SELECT Id, Name FROM Titles
-                    WHERE Id NOT IN (SELECT Id FROM staging.Titles)
-                """)
-                cursor.execute("""
-                    INSERT INTO staging.Experiences (Id, Range)
-                    SELECT Id, Range FROM Experiences
-                    WHERE Id NOT IN (SELECT Id FROM staging.Experiences)
-                """)
-                cursor.execute("""
-                    INSERT INTO staging.Salaries (Id, Range)
-                    SELECT Id, Range FROM Salaries
-                    WHERE Id NOT IN (SELECT Id FROM staging.Salaries)
-                """)
-                cursor.execute("""
-                    INSERT INTO staging.Skills (Id, Name)
-                    SELECT Id, Name FROM Skills
-                    WHERE Id NOT IN (SELECT Id FROM staging.Skills)
-                """)
-                cursor.execute("""
-                    INSERT INTO staging.InteractionSkill (ContextInteractionsId, ContextSkillsId)
-                    SELECT ContextInteractionsId, ContextSkillsId FROM InteractionSkill
-                    WHERE ContextInteractionsId NOT IN (SELECT ContextInteractionsId FROM staging.InteractionSkill)
-                """)
-                
-                connection.commit()
-
                 train_records = train_df.to_dict(orient='records')
                 test_records = test_df.to_dict(orient='records')
 
-                def insert_records(records, table_name):
-                    for record in records:
-                        cursor.execute(f"""
-                            INSERT INTO {table_name} (Id, Created, TitleId, ExperienceId, SalaryId, LabelSkillId)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                        """, (record['id'], record['created'], record['titleid'], record['experienceid'], record['salaryid'], record['labelskillid']))
+                def insert_records(records, table):
+                    for record in tqdm(records, desc=f'Inserting into {table}'):
+                        interaction_id = cursor.execute(f"""
+                            INSERT INTO staging.{table} ("Id", "Created", "TitleId", "ExperienceId", "SalaryId", "LabelSkillId")
+                            VALUES (gen_random_uuid(), NOW() AT TIME ZONE 'UTC', %s, %s, %s, %s) RETURNING \"Id\";
+                        """, (titles_df[titles_df['Name'] == record['context_user_title']].iloc[0]['Id'],
+                              experiences_df[experiences_df['Range'] == record['context_user_experience']].iloc[0]['Id'],
+                              salaries_df[salaries_df['Range'] == record['context_user_salary']].iloc[0]['Id'],
+                              skills_df[skills_df['Name'] == record['label_skill']].iloc[0]['Id'],)).fetchone()[0]
 
-                insert_records(train_records, 'staging.train_interactions')
-                insert_records(test_records, 'staging.test_interactions')
+                        for skill in record['context_skills']:
+                            cursor.execute(f"""
+                                INSERT INTO staging.{table}Skill ("ContextInteractionsId", "ContextSkillsId")
+                                VALUES (%s, %s)
+                            """, (interaction_id, skills_df[skills_df['Name'] == skill].iloc[0]['Id']))
 
-                connection.commit()
+                        connection.commit()
+
+                insert_records(train_records, 'train_interactions')
+                insert_records(test_records, 'test_interactions')
 
                 print("Train and test interactions inserted into staging database")
