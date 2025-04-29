@@ -25,7 +25,7 @@ def build(
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-dataset: intial dataset was built {result}""",
+            f"""pathmentor-dataset: intial dataset was built.""",
             fg=typer.colors.GREEN)
 
 @app.command()
@@ -41,7 +41,7 @@ def prepare(
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-dataset: intial dataset was prepared {result}""",
+            f"""pathmentor-dataset: intial dataset was prepared.""",
             fg=typer.colors.GREEN)
 
 @app.command()
@@ -58,7 +58,7 @@ def normalize(
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-dataset: intial dataset was normalized {result}""",
+            f"""pathmentor-dataset: intial dataset was normalized.""",
             fg=typer.colors.GREEN)
 
 def _version_callback(value: bool) -> None:

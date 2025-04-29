@@ -11,14 +11,6 @@ class PathMentorDatabaseStager:
                     CREATE SCHEMA IF NOT EXISTS staging
                 """)
 
-                for table in ['train_interactions', 'test_interactions']:
-                    cursor.execute(f"""
-                        DROP TABLE IF EXISTS staging.{table} CASCADE
-                    """)
-                    cursor.execute(f"""
-                        DROP TABLE IF EXISTS staging.{table}Skill CASCADE
-                    """)
-
                 connection.commit()
 
                 for table in ['train_interactions', 'test_interactions']:
@@ -128,21 +120,39 @@ class PathMentorDatabaseStager:
                 train_records = train_df.to_dict(orient='records')
                 test_records = test_df.to_dict(orient='records')
 
+                chunk_size = 2000
                 def insert_records(records, table):
-                    for record in tqdm(records, desc=f'Inserting into {table}'):
-                        interaction_id = cursor.execute(f"""
-                            INSERT INTO staging.{table} ("Id", "Created", "TitleId", "ExperienceId", "SalaryId", "LabelSkillId")
-                            VALUES (gen_random_uuid(), NOW() AT TIME ZONE 'UTC', %s, %s, %s, %s) RETURNING \"Id\";
-                        """, (titles_df[titles_df['Name'] == record['context_user_title']].iloc[0]['Id'],
-                              experiences_df[experiences_df['Range'] == record['context_user_experience']].iloc[0]['Id'],
-                              salaries_df[salaries_df['Range'] == record['context_user_salary']].iloc[0]['Id'],
-                              skills_df[skills_df['Name'] == record['label_skill']].iloc[0]['Id'],)).fetchone()[0]
+                    chunks = [records[i:i + chunk_size] for i in range(0, len(records), chunk_size)]
+                    for chunk in tqdm(chunks, desc=f'Inserting into {table}'):
+                        interaction_values = []
+                        skill_values = []
 
-                        for skill in record['context_skills']:
-                            cursor.execute(f"""
-                                INSERT INTO staging.{table}Skill ("ContextInteractionsId", "ContextSkillsId")
-                                VALUES (%s, %s)
-                            """, (interaction_id, skills_df[skills_df['Name'] == skill].iloc[0]['Id']))
+                        interaction_ids = cursor.execute(f"SELECT gen_random_uuid() FROM generate_series(1, {chunk_size})").fetchall()
+                        interaction_ids = [row[0] for row in interaction_ids]
+
+                        for index, record in enumerate(chunk):
+                            interaction_id = interaction_ids[index]
+                            interaction_values.append(f"""('{interaction_id}', NOW() AT TIME ZONE 'UTC', 
+                                '{titles_df[titles_df['Name'] == record['context_user_title']].iloc[0]['Id']}', 
+                                '{experiences_df[experiences_df['Range'] == record['context_user_experience']].iloc[0]['Id']}', 
+                                '{salaries_df[salaries_df['Range'] == record['context_user_salary']].iloc[0]['Id']}', 
+                                '{skills_df[skills_df['Name'] == record['label_skill']].iloc[0]['Id']}')""")
+
+                            for skill in record['context_skills']:
+                                skill_values.append(f"('{interaction_id}', "
+                                                    f"'{skills_df[skills_df['Name'] == skill].iloc[0]['Id']}')")
+
+                        interaction_query = f"""
+                            INSERT INTO staging.{table} ("Id", "Created", "TitleId", "ExperienceId", "SalaryId", "LabelSkillId")
+                            VALUES {', '.join(interaction_values)}
+                        """
+                        cursor.execute(interaction_query)
+
+                        skill_query = f"""
+                            INSERT INTO staging.{table}Skill ("ContextInteractionsId", "ContextSkillsId")
+                            VALUES {', '.join(skill_values)}
+                        """
+                        cursor.execute(skill_query)
 
                         connection.commit()
 

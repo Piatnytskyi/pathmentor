@@ -24,7 +24,7 @@ def stage(
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-model: database was staged {result}""",
+            f"""pathmentor-model: database was staged.""",
             fg=typer.colors.GREEN)
         
 @app.command()
@@ -40,7 +40,7 @@ def train(
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""pathmentor-model: model was trained {result}""",
+            f"""pathmentor-model: model was trained.""",
             fg=typer.colors.GREEN)
 
 def _version_callback(value: bool) -> None:
