@@ -33,28 +33,27 @@ class PathMentorModelTrainer:
                     GROUP BY i."Id", t."Id", e."Id", s."Id", sk."Id"
                 """)
                 for row in cursor:
-                    yield (row[0], row[1], row[2], row[3], tuple(row[4]))
+                    yield [str(row[0])], [str(row[1])], [str(row[2])], [str(row[3])], row[4]
 
     def _generate_skills_from(self):
         with psycopg.connect(self._connection_string) as connection:
             with connection.cursor() as cursor:
                 cursor.execute("""SELECT "Name" FROM "Skills";""")
                 for row in cursor:
-                    yield tuple(row)
+                    yield row[0]
 
     def train(self, output_path: Path) -> None:
         interactions_output_signature = (
-            tf.TensorSpec(shape=(), dtype=tf.string, name="context_user_title"),
-            tf.TensorSpec(shape=(), dtype=tf.string, name="context_user_experience"),
-            tf.TensorSpec(shape=(), dtype=tf.string, name="context_user_salary"),
-            tf.TensorSpec(shape=(), dtype=tf.string, name="label_skill"),
+            tf.TensorSpec(shape=(1, ), dtype=tf.string, name="context_user_title"),
+            tf.TensorSpec(shape=(1, ), dtype=tf.string, name="context_user_experience"),
+            tf.TensorSpec(shape=(1, ), dtype=tf.string, name="context_user_salary"),
+            tf.TensorSpec(shape=(1, ), dtype=tf.string, name="label_skill"),
             tf.TensorSpec(shape=(None, ), dtype=tf.string, name="context_skill")
         )
 
         train = tf.data.Dataset.from_generator(
             lambda: self._generate_interactions_from("train_interactions"),
-            output_signature=interactions_output_signature,
-            )
+            output_signature=interactions_output_signature)
         test = tf.data.Dataset.from_generator(
             lambda: self._generate_interactions_from("test_interactions"),
             output_signature=interactions_output_signature)
@@ -73,14 +72,10 @@ class PathMentorModelTrainer:
         for x in train_ds.take(1).as_numpy_iterator():
             pprint.pprint(x)
 
-        unique_user_titles = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_title"]))))
-        unique_user_experience = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_experience"]))))
-        unique_user_salary = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_salary"]))))
-
         skills = tf.data.Dataset.from_generator(
             lambda: self._generate_skills_from(),
             output_signature=(
-                tf.TensorSpec(shape=(1, ), dtype=tf.string, name="skill")
+                tf.TensorSpec(shape=(), dtype=tf.string, name="skill")
             ))
 
         skills_ds = skills.map(lambda skill: tf.strings.as_string(skill))
@@ -88,6 +83,9 @@ class PathMentorModelTrainer:
         for x in skills_ds.take(5).as_numpy_iterator():
             pprint.pprint(x)
 
+        unique_user_titles = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_title"]))))
+        unique_user_experience = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_experience"]))))
+        unique_user_salary = np.unique(np.concatenate(list(train_ds.padded_batch(1000).map(lambda x: x["context_user_salary"]))))
         unique_user_skills = np.unique(np.concatenate(list(skills_ds.batch(1000))))
 
         embedding_dimension = 32

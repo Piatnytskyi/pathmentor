@@ -509,63 +509,43 @@ class PathMentorDatasetBuilder:
 
                 connection.commit()
 
-                interaction_ids = cursor.execute(f"SELECT gen_random_uuid() FROM generate_series(1, {interactions_df.shape[0] + 1})").fetchall()
-                interaction_ids = [row[0] for row in interaction_ids]
-
-                chunk_size = 2000
-                chunks = [interactions_df[i:i + chunk_size] for i in range(0, interactions_df.shape[0], chunk_size)]
-                for chunk in tqdm(chunks, desc="Inserting interactions"):
-                    interaction_values = []
-                    skills_values = []
+                for _, row in tqdm(interactions_df.iterrows(), total=interactions_df.shape[0], desc="Inserting interactions"):
+                    interaction = row.to_dict()
                     
-                    for index, interaction in chunk.iterrows():                    
-                        cursor.execute("SELECT \"Id\" FROM \"Titles\" WHERE \"Name\" = %s;", (interaction['context_user_title'],))
-                        title_id = cursor.fetchone()
-                        if title_id is None:
-                            title_id = cursor.execute("INSERT INTO \"Titles\" (\"Id\",\"Name\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_title'],)).fetchone()[0]
-                        else:
-                            title_id = title_id[0]
-                        
-                        cursor.execute("SELECT \"Id\" FROM \"Experiences\" WHERE \"Range\" = %s;", (interaction['context_user_experience'],))
-                        experience_id = cursor.fetchone()
-                        if experience_id is None:
-                            experience_id = cursor.execute("INSERT INTO \"Experiences\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_experience'],)).fetchone()[0]
-                        else:
-                            experience_id = experience_id[0]
-            
-                        cursor.execute("SELECT \"Id\" FROM \"Salaries\" WHERE \"Range\" = %s;", (interaction['context_user_salary'],))
-                        salary_id = cursor.fetchone()
-                        if salary_id is None:
-                            salary_id = cursor.execute("INSERT INTO \"Salaries\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_salary'],)).fetchone()[0]
-                        else:
-                            salary_id = salary_id[0]
+                    cursor.execute("SELECT \"Id\" FROM \"Titles\" WHERE \"Name\" = %s;", (interaction['context_user_title'],))
+                    title_id = cursor.fetchone()
+                    if title_id is None:
+                        title_id = cursor.execute("INSERT INTO \"Titles\" (\"Id\",\"Name\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_title'],)).fetchone()[0]
+                    else:
+                        title_id = title_id[0]
+                    
+                    cursor.execute("SELECT \"Id\" FROM \"Experiences\" WHERE \"Range\" = %s;", (interaction['context_user_experience'],))
+                    experience_id = cursor.fetchone()
+                    if experience_id is None:
+                        experience_id = cursor.execute("INSERT INTO \"Experiences\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_experience'],)).fetchone()[0]
+                    else:
+                        experience_id = experience_id[0]
+        
+                    cursor.execute("SELECT \"Id\" FROM \"Salaries\" WHERE \"Range\" = %s;", (interaction['context_user_salary'],))
+                    salary_id = cursor.fetchone()
+                    if salary_id is None:
+                        salary_id = cursor.execute("INSERT INTO \"Salaries\" (\"Id\",\"Range\") VALUES (gen_random_uuid(), %s) RETURNING \"Id\";", (interaction['context_user_salary'],)).fetchone()[0]
+                    else:
+                        salary_id = salary_id[0]
 
-                        label_skill_id = unique_skills_ids[interaction['label_skill']]
+                    label_skill_id = unique_skills_ids[interaction['label_skill']]
 
-                        interaction_id = interaction_ids[index]
-                        interaction_values.append(f"""
-                            ('{interaction_id}', '{title_id}', '{experience_id}', '{salary_id}', '{label_skill_id}', NOW() AT TIME ZONE 'UTC')
-                        """)
-
-                        context_skill_ids = [unique_skills_ids[skill] for skill in interaction['context_skill']]
-                        for context_skill_id in context_skill_ids:
-                            skills_values.append(f"""
-                                ('{interaction_id}', '{context_skill_id}')
-                            """ )
-
-                    interaction_query = f"""
+                    interaction_id = cursor.execute("""
                         INSERT INTO \"Interactions\" (
                             \"Id\", \"TitleId\", \"ExperienceId\", \"SalaryId\", \"LabelSkillId\", \"Created\"
-                        ) VALUES {', '.join(interaction_values)}
-                    """
-                    cursor.execute(interaction_query)
+                        ) VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW() AT TIME ZONE 'UTC') RETURNING \"Id\";
+                        """, (title_id, experience_id, salary_id, label_skill_id)).fetchone()[0]
 
-                    skills_query = f"""
-                        INSERT INTO \"InteractionSkill\" (
-                            \"ContextInteractionsId\", \"ContextSkillsId\"
-                        ) VALUES {', '.join(skills_values)}
-                    """
-                    cursor.execute(skills_query)
+                    context_skill_ids = [unique_skills_ids[skill] for skill in interaction['context_skill']]
+                    for context_skill_id in context_skill_ids:
+                        cursor.execute("""
+                            INSERT INTO \"InteractionSkill\" (\"ContextInteractionsId\", \"ContextSkillsId\") VALUES (%s, %s);
+                            """, (interaction_id, context_skill_id))
                     
                     connection.commit()
 
