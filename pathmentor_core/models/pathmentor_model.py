@@ -21,4 +21,4 @@ class PahtmentorModel(tfrs.Model):
         })       
         candidate_embedding = self._candidate_model(features["label_skill"])
 
-        return self._task(query_embedding, candidate_embedding, compute_metrics=not training)
+        return self._task(query_embedding, candidate_embedding)

@@ -1,7 +1,6 @@
 from pathlib import Path
-import tempfile
 from mediatr import Mediator 
-from typing import List, Optional
+from typing import Optional
 
 import typer
 
@@ -30,8 +29,8 @@ def stage(
         
 @app.command()
 def train(
-        connection_string: str = typer.Argument(envvar="ConnectionStrings__DefaultConnection"),
-        output_path: Path = typer.Argument(..., dir_okay=True, file_okay=True, writable=True, resolve_path=True)
+        output_path: Path = typer.Argument(..., dir_okay=True, file_okay=True, writable=True, resolve_path=True),
+        connection_string: str = typer.Argument(envvar="ConnectionStrings__DefaultConnection")
     ) -> None:
     request = TrainModelCommand(connection_string, output_path)
     result, error = mediator.send(request)

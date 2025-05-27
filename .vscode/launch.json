@@ -39,6 +39,27 @@
             "python": "${workspaceFolder}/pathmentor_dataset_cli/.venv/bin/python3"
         },
         {
+            "name": "Python Debugger: pathmentor_model_cli stage",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pathmentor_model_cli",
+            "args": [
+                "stage"
+            ],
+            "python": "${workspaceFolder}/pathmentor_model_cli/.venv/bin/python3"
+        },
+        {
+            "name": "Python Debugger: pathmentor_model_cli train",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pathmentor_model_cli",
+            "args": [
+                "train",
+                "pathmentor_model_cli/bin"
+            ],
+            "python": "${workspaceFolder}/pathmentor_model_cli/.venv/bin/python3"
+        },
+        {
             "name": "Docker .NET Attach (Preview)",
             "type": "docker",
             "request": "attach",

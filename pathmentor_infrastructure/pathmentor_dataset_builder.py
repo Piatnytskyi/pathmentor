@@ -2,7 +2,6 @@ from decimal import Decimal
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import pandas as pd
 import psycopg
 from tqdm import tqdm
 

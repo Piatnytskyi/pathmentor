@@ -54,3 +54,17 @@ services:
         condition: service_healthy
       pathmentormodelapi:
         condition: service_healthy
+
+  pathmentormodelcli:
+    image: ${DOCKER_REGISTRY-}pathmentor.model.cli
+    container_name: pathmentor.model.cli
+    build:
+      context: .
+      dockerfile: pathmentor_model_cli/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=host=pathmentor.model.database port=5432 dbname=pathmentormodel user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}
+    depends_on:
+      pathmentormodeldatabase:
+        condition: service_healthy
+      pathmentordatasetcli:
+        condition: service_completed_successfully

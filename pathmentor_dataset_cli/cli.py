@@ -1,7 +1,6 @@
 from pathlib import Path
-import tempfile
 from mediatr import Mediator 
-from typing import List, Optional
+from typing import Optional
 
 import typer
 
