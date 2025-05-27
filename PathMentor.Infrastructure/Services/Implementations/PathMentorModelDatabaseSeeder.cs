@@ -18,17 +18,24 @@ namespace PathMentor.Infrastructure.Services.Implementations
             if (context.Interactions.Any())
                 return;
            
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(configuration["AzureFunctions:PathmentorETLHttpTriggerUrl"]!);
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    (await client
+                        .SendAsync(
+                            new HttpRequestMessage(
+                                HttpMethod.Post,
+                                new Uri(configuration["AzureFunctions:PathMentorETLHttpTriggerUrl"]!))))
+                        .EnsureSuccessStatusCode();
 
-            try
-            {
-                (await client.PostAsync("", new StringContent(""))).EnsureSuccessStatusCode();
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error launching ETL function!");
-                return;
+                    logger.LogInformation("ETL function launched successfully!");
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Error launching ETL function!");
+                    return;
+                }
             }
         }
     }
