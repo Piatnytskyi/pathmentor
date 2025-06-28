@@ -15,6 +15,7 @@ namespace PathMentor.UseCases
                 // options.AddOpenBehavior(typeof(AuthorizationBehavior<,>));
                 // options.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
+            services.AddAutoMapper(typeof(IServiceCollectionExtensions).Assembly);
 
             services.AddValidatorsFromAssemblyContaining(typeof(IServiceCollectionExtensions));
             return services;

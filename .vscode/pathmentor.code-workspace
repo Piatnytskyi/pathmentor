@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../PathMentor.Functions"
+		},
+		{
+			"path": "../pathmentor_functions"
+		}
+	],
+	"settings": {
+		"dotnet.defaultSolution": "PathMentor.sln",
+		"debug.internalConsoleOptions": "neverOpen"
+	}
+}

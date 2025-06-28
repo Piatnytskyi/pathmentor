@@ -127,3 +127,4 @@ class PathMentorModelTrainer:
         print(f"Recommendations: {skills}")
 
         tf.saved_model.save(index, output_path)
+        print(f"Model saved to {output_path}")

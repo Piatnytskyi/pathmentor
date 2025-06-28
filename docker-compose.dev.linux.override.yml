@@ -38,6 +38,8 @@ services:
     depends_on:
       pathmentormodeldatabase:
         condition: service_healthy
+      pathmentorazurite:
+        condition: service_healthy
 
   pathmentordatasetcli:
     image: ${DOCKER_REGISTRY-}pathmentor.dataset.cli
