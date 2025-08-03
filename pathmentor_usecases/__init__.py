@@ -15,3 +15,8 @@ def register_model_handlers():
     
     Mediator.register_handler(StageDatabaseCommandHandler)
     Mediator.register_handler(TrainModelCommandHandler)
+
+def register_prediction_handlers():
+    from pathmentor_usecases.model.queries.skills_prediction_query_handler import SkillsPredictionQueryHandler
+
+    Mediator.register_handler(SkillsPredictionQueryHandler)

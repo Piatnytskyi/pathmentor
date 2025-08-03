@@ -4,8 +4,9 @@
     FILE_ERROR,
     DB_READ_ERROR,
     DB_WRITE_ERROR,
-    MODEL_TRAIN_ERROR
-) = range(6)
+    MODEL_TRAIN_ERROR,
+    MODEL_QUERY_ERROR
+) = range(7)
 
 ERRORS = {
     DIR_ERROR: "Directory error",
